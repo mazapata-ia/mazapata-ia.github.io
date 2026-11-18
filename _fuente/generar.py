@@ -144,7 +144,9 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
 <meta property="og:type" content="{tipo}">
 <meta property="og:url" content="{e(canon)}">
 <meta property="og:locale" content="es_CO">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{URL}/assets/grabado-portada.jpg">
+<meta property="og:image:alt" content="Grabado de una misma persona sentada, en tamaño grande y pequeño.">
+<meta name="twitter:card" content="summary_large_image">
 {extra_head}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,7 +261,7 @@ def portada():
       <p class="tagline mono">Un espacio para pensar, sentir y escribir sobre la experiencia humana</p>
       <nav class="pills" aria-label="Ir a una sección">{pills}</nav>
     </div>
-    {lienzo("portada-biblioteca", "hero-art", "1.1")}
+    <picture class="hero-art"><source srcset="{BASE}assets/grabado-portada.webp" type="image/webp"><img src="{BASE}assets/grabado-portada.jpg" width="900" height="1200" alt="Grabado de una misma persona sentada, en tamaño grande y pequeño, con una cinta verde que cruza el cuerpo. Dibujo de Mariana Zapata."></picture>
   </section>{dest_html}
   <section class="index" aria-labelledby="titulo-indice">
     <h2 class="cond" id="titulo-indice">Índice</h2>
