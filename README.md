@@ -1,4 +1,4 @@
-# La Biblioteca · Mariana Zapata
+# Ofrenda · Mariana Zapata
 
 Un espacio para pensar, sentir y escribir sobre la experiencia humana.
 

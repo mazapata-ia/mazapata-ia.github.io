@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera el sitio estático de La Biblioteca a partir de _fuente/escritos.json.
+"""Genera el sitio estático de Ofrenda a partir de _fuente/escritos.json.
 
 Uso: python3 _fuente/generar.py   (desde la raíz del repositorio)
 
@@ -133,7 +133,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   <div class="wrap">
     {lienzo("apoyo-sello", dens="2")}
     <div>
-      <h2>Sostener la biblioteca</h2>
+      <h2>Sostener Ofrenda</h2>
       <p>{e(apoyo.get("texto", ""))}</p>
     </div>
     <a class="btn-light mono" href="{BASE}apoyar/">Hacer un aporte</a>
@@ -170,7 +170,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   <header class="bar">
     <a class="brand" href="{BASE}" aria-label="{e(SITIO['nombre'])}, inicio">
       {lienzo("sello-biblioteca", dens="1.7")}
-      <span>La<br>Biblioteca</span>
+      <span>{e(SITIO['nombre'])}</span>
     </a>
     <a class="bar-center mono" href="{BASE}">Escritos · Lecturas</a>
     <button class="menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu" type="button">
@@ -260,7 +260,7 @@ def portada():
     cuerpo = f"""<div class="wrap">
   <section class="hero">
     <div>
-      <h1 class="masthead"><span class="l1">La</span><span class="l2">Biblioteca</span></h1>
+      <h1 class="masthead"><span>{e(SITIO['nombre'])}</span></h1>
       <p class="lede">La escritura como el resultado de una exploración intelectual.</p>
     </div>
     <div class="hero-right">
@@ -381,19 +381,19 @@ def apoyar():
     cuerpo = f"""<div class="wrap"><section class="page">
   <div>
     <p class="mono">V — Apoyar</p>
-    <h1>Sostener la biblioteca</h1>
+    <h1>Sostener Ofrenda</h1>
     <p class="big">{e(A.get("texto", ""))}</p>
     <ul class="ways">{formas}</ul>
     <p class="note">Los aportes se procesan en la plataforma elegida; este sitio no guarda datos de pago. Gracias por leer.</p>
   </div>
   <aside>{lienzo("apoyo-pagina", dens="1.3")}</aside>
 </section></div>"""
-    return pagina("apoyar/", "Apoyar", "Formas de apoyar La Biblioteca, el espacio de escritura de " + SITIO["autora"] + ".",
+    return pagina("apoyar/", "Apoyar", "Formas de apoyar Ofrenda, el espacio de escritura de " + SITIO["autora"] + ".",
                   cuerpo, banda=False)
 
 
 def no_encontrado():
-    cuerpo = f'<div class="wrap"><p class="error">Esta página no está en la biblioteca. <a href="{BASE}">Volver a la portada</a></p></div>'
+    cuerpo = f'<div class="wrap"><p class="error">Esta página no existe. <a href="{BASE}">Volver a la portada</a></p></div>'
     return pagina("404.html", "Página no encontrada", SITIO["descripcion"], cuerpo, indexar=False)
 
 

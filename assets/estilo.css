@@ -239,3 +239,9 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
 /* Portada: un destacado por sección */
 .featured:last-of-type { margin-bottom: 24px; }
 #ultimos { scroll-margin-top: 24px; }
+
+/* Ofrenda: titular de una sola palabra */
+.masthead { font-size: clamp(64px, 10.5vw, 168px); }
+@media (max-width: 980px) { .masthead { font-size: 14vw; } }
+@media (max-width: 620px) { .masthead { font-size: 25vw; } }
+.brand span { font-size: 21px; }

@@ -1,4 +1,4 @@
-/* La Biblioteca: grabados generativos, menú y filtro del índice. */
+/* Ofrenda: grabados generativos, menú y filtro del índice. */
 (function () {
   "use strict";
   var INK = "#1B1A18", PAPER = "#F2EEE8";
