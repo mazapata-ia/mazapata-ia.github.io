@@ -2,7 +2,7 @@
 
 Un espacio para pensar, sentir y escribir sobre la experiencia humana.
 
-Sitio: https://mazapata-ia.github.io/mariana.zapata/
+Sitio: https://mazapata-ia.github.io/
 
 ## Cómo se actualiza
 
