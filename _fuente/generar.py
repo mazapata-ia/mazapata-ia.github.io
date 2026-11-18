@@ -1,0 +1,423 @@
+#!/usr/bin/env python3
+"""Genera el sitio estático de La Biblioteca a partir de _fuente/escritos.json.
+
+Uso: python3 _fuente/generar.py   (desde la raíz del repositorio)
+
+Los textos se publican exactamente como están en escritos.json: el cuerpo se
+escapa para HTML pero no se corrige ni se modifica.
+"""
+import datetime
+import html
+import json
+import os
+import re
+import shutil
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATOS = json.load(open(os.path.join(RAIZ, "_fuente", "escritos.json"), encoding="utf-8"))
+SITIO = DATOS["sitio"]
+BASE = SITIO["base"]
+URL = SITIO["url"].rstrip("/")
+VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
+
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+         "septiembre", "octubre", "noviembre", "diciembre"]
+SECCIONES = {
+    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "desc": "Escritura de texto corto"},
+    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo"},
+    "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
+                 "desc": "Reflexiones sobre libros y artículos leídos"},
+}
+ORDEN = ["breves", "largos", "lecturas"]
+GENERADAS = ["breves", "largos", "lecturas", "acerca", "apoyar", "escritos"]
+
+e = lambda s: html.escape(str(s), quote=True)
+
+
+def fecha(s):
+    a, m, d = (int(x) for x in s.split("-"))
+    return datetime.date(a, m, d)
+
+
+def fecha_larga(s):
+    d = fecha(s)
+    return f"{d.day} de {MESES[d.month - 1]} de {d.year}"
+
+
+def mes_anio(s):
+    d = fecha(s)
+    return f"{MESES[d.month - 1]} {d.year}"
+
+
+def texto_plano(x):
+    if x.get("cuerpo"):
+        return x["cuerpo"]
+    return re.sub(r"<[^>]+>", " ", html.unescape(x.get("cuerpo_html", "")))
+
+
+def minutos(x):
+    return max(1, round(len(texto_plano(x).split()) / 210))
+
+
+def extracto(x):
+    if x.get("cita"):
+        return x["cita"]
+    p = re.split(r"\n\s*\n", texto_plano(x).strip())[0]
+    w = p.split()
+    return " ".join(w[:32]) + " …" if len(w) > 32 else p
+
+
+def descripcion(x):
+    t = " ".join(texto_plano(x).split())
+    return t if len(t) <= 158 else t[:155].rsplit(" ", 1)[0] + "…"
+
+
+def etiqueta(x):
+    return "Muestra" if x.get("muestra") else f"Nº {x['numero']:02d}"
+
+
+def url_escrito(x):
+    return f"{BASE}escritos/{x['id']}/"
+
+
+def lienzo(seed, cls="", dens=None):
+    c = f' class="{cls}"' if cls else ""
+    d = f' data-density="{dens}"' if dens else ""
+    return f'<canvas{c} data-seed="{e(seed)}"{d} aria-hidden="true"></canvas>'
+
+
+def obra(x, cls):
+    o = x.get("obra")
+    if not o:
+        return ""
+    autor = f", de {e(o['autor'])}" if o.get("autor") else ""
+    return f'<p class="{cls}">Sobre <em>{e(o["titulo"])}</em>{autor}</p>'
+
+
+MUESTRA_TAG = '<span class="tag-muestra">Muestra</span>'
+
+# ---------- numeración ----------
+ESCRITOS = DATOS["escritos"]
+n = 0
+for x in sorted(ESCRITOS, key=lambda x: fecha(x["fecha"])):
+    if not x.get("muestra"):
+        n += 1
+        x["numero"] = n
+
+
+def por_seccion(sec):
+    return [x for x in ESCRITOS if x["seccion"] == sec]
+
+
+# ---------- plantilla ----------
+def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head="", banda=True):
+    canon = URL + "/" + ruta
+    titulo_full = titulo if titulo == SITIO["nombre"] else f"{titulo} · {SITIO['nombre']}"
+    verif = (f'<meta name="google-site-verification" content="{e(SITIO["google_verificacion"])}">'
+             if SITIO.get("google_verificacion") else "")
+    robots = "" if indexar else '<meta name="robots" content="noindex">'
+    apoyo = SITIO.get("apoyo", {})
+    banda_html = f"""
+<section class="support-band" aria-label="Apoyar este espacio">
+  <div class="wrap">
+    {lienzo("apoyo-sello", dens="2")}
+    <div>
+      <h2>Sostener la biblioteca</h2>
+      <p>{e(apoyo.get("texto", ""))}</p>
+    </div>
+    <a class="btn-light mono" href="{BASE}apoyar/">Hacer un aporte</a>
+  </div>
+</section>""" if banda else ""
+    return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{e(titulo_full)}</title>
+<meta name="description" content="{e(desc)}">
+<meta name="author" content="{e(SITIO['autora'])}">
+{robots}{verif}
+<link rel="canonical" href="{e(canon)}">
+<meta property="og:site_name" content="{e(SITIO['nombre'])}">
+<meta property="og:title" content="{e(titulo)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:type" content="{tipo}">
+<meta property="og:url" content="{e(canon)}">
+<meta property="og:locale" content="es_CO">
+<meta name="twitter:card" content="summary">
+{extra_head}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=DM+Mono:wght@400;500&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{BASE}assets/estilo.css?v={VERSION}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 40'%3E%3Crect width='32' height='40' fill='%231B1A18'/%3E%3Cpath d='M6 30c6-10 14-14 20-22M6 22c5-6 10-9 16-12' stroke='%23F2EEE8' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="{BASE}" aria-label="{e(SITIO['nombre'])}, inicio">
+      {lienzo("sello-biblioteca", dens="1.7")}
+      <span>La<br>Biblioteca</span>
+    </a>
+    <a class="bar-center mono" href="{BASE}">Escritos · Lecturas</a>
+    <button class="menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu" type="button">
+      <i></i><i></i><span class="mono">Menú</span>
+    </button>
+  </header>
+</div>
+
+<nav class="menu" id="menu" hidden aria-label="Secciones">
+  <div class="wrap">
+    <div class="menu-top">
+      <span class="mono">Índice general</span>
+      <button class="menu-close mono" id="menu-close" type="button">Cerrar</button>
+    </div>
+    <ol>
+      <li><a href="{BASE}"><span class="mono">—</span><span>Portada</span></a></li>
+      <li><a href="{BASE}breves/"><span class="mono">I</span><span>Textos breves</span></a></li>
+      <li><a href="{BASE}largos/"><span class="mono">II</span><span>Textos largos</span></a></li>
+      <li><a href="{BASE}lecturas/"><span class="mono">III</span><span>Lecturas que me atraviesan</span></a></li>
+      <li><a href="{BASE}acerca/"><span class="mono">IV</span><span>Acerca de este espacio</span></a></li>
+      <li><a href="{BASE}apoyar/"><span class="mono">V</span><span>Apoyar</span></a></li>
+    </ol>
+  </div>
+</nav>
+
+<main id="view">
+{cuerpo}
+</main>
+{banda_html}
+<footer>
+  <div class="wrap">
+    <span class="mono">{e(SITIO['nombre'])} · {e(SITIO['autora'])}</span>
+    <nav class="mono" aria-label="Pie">
+      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}acerca/">Acerca</a><a href="{BASE}apoyar/">Apoyar</a>
+    </nav>
+  </div>
+</footer>
+<script src="{BASE}assets/sitio.js?v={VERSION}" defer></script>
+</body>
+</html>
+"""
+
+
+# ---------- vistas ----------
+def entrada_indice(x):
+    num = "00" if x.get("muestra") else f"{x['numero']:02d}"
+    tag = MUESTRA_TAG if x.get("muestra") else ""
+    who = ""
+    if x.get("obra"):
+        o = x["obra"]
+        autor = e(o["autor"]) + " · " if o.get("autor") else ""
+        who = f'<span class="who">{autor}<em>{e(o["titulo"])}</em></span>'
+    return f"""<li class="entry"><a href="{url_escrito(x)}">
+  <div class="t"><b>{num}</b><span>{e(x['titulo'])}</span>{tag}</div>{who}
+  <p class="q">«{e(extracto(x))}»</p>
+</a></li>"""
+
+
+def portada():
+    reales = [x for x in ESCRITOS if not x.get("muestra")]
+    base = reales or ESCRITOS
+    dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0))) if base else None
+    pills = '<button class="pill" type="button" data-filtro="todo" aria-pressed="true">Todo</button>' + "".join(
+        f'<button class="pill" type="button" data-filtro="{k}" aria-pressed="false">{SECCIONES[k]["corto"]}</button>'
+        for k in ORDEN)
+    dest_html = ""
+    if dest:
+        u = url_escrito(dest)
+        dest_html = f"""
+  <section class="featured" aria-label="Último escrito">
+    <span class="vert mono">{etiqueta(dest)} · {SECCIONES[dest['seccion']]['corto']}</span>
+    <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
+      <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
+      {lienzo(dest["id"], dens="1.2")}
+    </a>
+    <div class="body">
+      <h2><a href="{u}">{e(dest['titulo'])}</a></h2>
+      {obra(dest, "obra")}
+      <p class="excerpt">{e(extracto(dest))}</p>
+      <a class="readlink mono" href="{u}">Leer este texto</a>
+    </div>
+    <div class="issue"><b>{etiqueta(dest)}</b><span class="mono">{mes_anio(dest['fecha'])} · {minutos(dest)} min</span></div>
+  </section>"""
+    cols = ""
+    for k in ORDEN:
+        lista = list(reversed(por_seccion(k)))
+        items = (f'<ul class="entries">{"".join(entrada_indice(x) for x in lista)}</ul>' if lista
+                 else '<p class="empty">El primer texto está en preparación.</p>')
+        cols += f"""<div class="col" data-sec="{k}">
+      <h3 class="mono"><a href="{BASE}{k}/">{SECCIONES[k]['num']} — {SECCIONES[k]['nombre']}</a></h3>
+      {items}
+    </div>"""
+    cuerpo = f"""<div class="wrap">
+  <section class="hero">
+    <div>
+      <h1 class="masthead"><span class="l1">La</span><span class="l2">Biblioteca</span></h1>
+      <p class="lede">Biblioteca intelectual que alimenta la escritura. La escritura como el resultado de una exploración intelectual.</p>
+    </div>
+    <div class="hero-right">
+      <p class="tagline mono">Un espacio para pensar, sentir y escribir sobre la experiencia humana</p>
+      <div class="pills" role="group" aria-label="Filtrar el índice">{pills}</div>
+    </div>
+    {lienzo("portada-biblioteca", "hero-art", "1.1")}
+  </section>{dest_html}
+  <section class="index" aria-labelledby="titulo-indice">
+    <h2 class="cond" id="titulo-indice">Índice</h2>
+    <div class="cols">{cols}</div>
+  </section>
+</div>"""
+    ld = json.dumps({"@context": "https://schema.org", "@type": "WebSite", "name": SITIO["nombre"],
+                     "url": URL + "/", "description": SITIO["descripcion"], "inLanguage": "es",
+                     "author": {"@type": "Person", "name": SITIO["autora"]}}, ensure_ascii=False)
+    return pagina("", SITIO["nombre"], SITIO["descripcion"], cuerpo,
+                  extra_head=f'<script type="application/ld+json">{ld}</script>')
+
+
+def seccion(k):
+    S = SECCIONES[k]
+    lista = list(reversed(por_seccion(k)))
+    reales = len([x for x in lista if not x.get("muestra")])
+    filas = ""
+    for x in lista:
+        ob = obra(x, "q").replace('class="q"', 'class="q" style="font-style:normal;color:var(--ink)"')
+        filas += f"""<li class="row"><a href="{url_escrito(x)}">
+      <span class="n">{etiqueta(x)}</span>
+      <div><h2>{e(x['titulo'])}</h2>{ob}<p class="q">{e(extracto(x))}</p></div>
+      <span class="d mono">{fecha_larga(x['fecha'])}</span>
+      {lienzo(x["id"], dens="1.2")}
+    </a></li>"""
+    if not filas:
+        filas = '<li><p class="empty">El primer texto de esta sección está en preparación.</p></li>'
+    cuerpo = f"""<div class="wrap">
+  <header class="sec-head">
+    <span class="roman">{S['num']}</span>
+    <h1>{e(S['nombre'])}</h1>
+    <p class="mono">{e(S['desc'])} · {"1 texto" if reales == 1 else f"{reales} textos"}</p>
+  </header>
+  <ol class="rows" reversed>{filas}</ol>
+</div>"""
+    return pagina(f"{k}/", S["nombre"], f"{S['nombre']} de {SITIO['autora']}: {S['desc'].lower()}.", cuerpo)
+
+
+def cuerpo_html(x):
+    if x.get("cuerpo_html"):
+        return x["cuerpo_html"]
+    partes = re.split(r"\n[ \t]*\n", x["cuerpo"])
+    return "\n".join(f"<p>{e(p)}</p>" for p in partes if p)
+
+
+def escrito(x):
+    S = SECCIONES[x["seccion"]]
+    lista = por_seccion(x["seccion"])
+    i = lista.index(x)
+
+    def enlace(y, rot):
+        if not y:
+            return "<span></span>"
+        return f'<a href="{url_escrito(y)}"><span class="mono">{rot}</span><span>{e(y["titulo"])}</span></a>'
+
+    meta = "".join(f'<div><dt class="mono">{a}</dt><dd>{e(b)}</dd></div>' for a, b in [
+        ("Sección", f"{S['num']} · {S['corto']}"), ("Número", etiqueta(x)),
+        ("Fecha", fecha_larga(x["fecha"])), ("Lectura", f"{minutos(x)} min")])
+    tag = MUESTRA_TAG if x.get("muestra") else ""
+    cita = f'<blockquote class="pull">{e(x["cita"])}</blockquote>' if x.get("cita") else ""
+    drop = " drop" if x["seccion"] == "largos" else ""
+    cuerpo = f"""<div class="wrap">
+  <a class="back mono" href="{BASE}{x['seccion']}/">← {e(S['nombre'])}</a>
+  <article class="article">
+    <dl class="meta">{meta}{lienzo(x["id"], dens="1.2")}</dl>
+    <div>
+      <h1 class="art-title">{e(x['titulo'])}{tag}</h1>
+      {obra(x, "art-obra")}
+      {cita}
+      <div class="prose{drop}">
+{cuerpo_html(x)}
+      </div>
+      <div class="signoff"><span class="mono">{e(SITIO['autora'])}</span><a class="mono" href="{BASE}apoyar/">Apoyar este espacio</a></div>
+      <nav class="pager" aria-label="Otros textos de la sección">{enlace(lista[i - 1] if i > 0 else None, "← Anterior")}{enlace(lista[i + 1] if i + 1 < len(lista) else None, "Siguiente →")}</nav>
+    </div>
+  </article>
+</div>"""
+    ld = {"@context": "https://schema.org", "@type": "Review" if x.get("obra") else "Article",
+          "headline": x["titulo"], "datePublished": x["fecha"], "inLanguage": "es",
+          "author": {"@type": "Person", "name": SITIO["autora"]},
+          "mainEntityOfPage": URL + f"/escritos/{x['id']}/", "description": descripcion(x)}
+    if x.get("obra"):
+        ld["itemReviewed"] = {"@type": "CreativeWork", "name": x["obra"]["titulo"],
+                              "author": {"@type": "Person", "name": x["obra"].get("autor", "")}}
+    extra = (f'<meta property="article:published_time" content="{x["fecha"]}">'
+             f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+    return pagina(f"escritos/{x['id']}/", x["titulo"], descripcion(x), cuerpo,
+                  indexar=not x.get("muestra"), tipo="article", extra_head=extra)
+
+
+def acerca():
+    secs = "".join(f"""<li><a href="{BASE}{k}/"><span class="mono">{SECCIONES[k]['num']}</span>
+      <div><b>{SECCIONES[k]['nombre']}</b><small>{SECCIONES[k]['desc']}</small></div></a></li>""" for k in ORDEN)
+    cuerpo = f"""<div class="wrap"><section class="page">
+  <div>
+    <p class="mono">Acerca de este espacio</p>
+    <h1>Biblioteca intelectual que alimenta la escritura</h1>
+    <p class="big">Un espacio para pensar, sentir y escribir sobre la experiencia humana.</p>
+    <p>La escritura como el resultado de una exploración intelectual. Aquí se publican textos terminados de {e(SITIO['autora'])}, organizados en tres secciones.</p>
+    <ul class="secs">{secs}</ul>
+  </div>
+  <aside>{lienzo("acerca-biblioteca", dens="1.1")}</aside>
+</section></div>"""
+    return pagina("acerca/", "Acerca de este espacio", SITIO["descripcion"], cuerpo)
+
+
+def apoyar():
+    A = SITIO.get("apoyo", {})
+    formas = ""
+    for o in A.get("opciones", []):
+        boton = (f'<a class="mono" href="{e(o["url"])}" target="_blank" rel="noopener">Aportar</a>' if o.get("url")
+                 else '<span class="pending mono">Enlace por configurar</span>')
+        formas += f'<li class="way"><div><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>{boton}</li>'
+    cuerpo = f"""<div class="wrap"><section class="page">
+  <div>
+    <p class="mono">V — Apoyar</p>
+    <h1>Sostener la biblioteca</h1>
+    <p class="big">{e(A.get("texto", ""))}</p>
+    <ul class="ways">{formas}</ul>
+    <p class="note">Los aportes se procesan en la plataforma elegida; este sitio no guarda datos de pago. Gracias por leer.</p>
+  </div>
+  <aside>{lienzo("apoyo-pagina", dens="1.3")}</aside>
+</section></div>"""
+    return pagina("apoyar/", "Apoyar", "Formas de apoyar La Biblioteca, el espacio de escritura de " + SITIO["autora"] + ".",
+                  cuerpo, banda=False)
+
+
+def no_encontrado():
+    cuerpo = f'<div class="wrap"><p class="error">Esta página no está en la biblioteca. <a href="{BASE}">Volver a la portada</a></p></div>'
+    return pagina("404.html", "Página no encontrada", SITIO["descripcion"], cuerpo, indexar=False)
+
+
+# ---------- escritura ----------
+def escribir(ruta, contenido):
+    p = os.path.join(RAIZ, ruta)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(contenido)
+
+
+for d in GENERADAS:
+    shutil.rmtree(os.path.join(RAIZ, d), ignore_errors=True)
+
+escribir("index.html", portada())
+for k in ORDEN:
+    escribir(f"{k}/index.html", seccion(k))
+for x in ESCRITOS:
+    escribir(f"escritos/{x['id']}/index.html", escrito(x))
+escribir("acerca/index.html", acerca())
+escribir("apoyar/index.html", apoyar())
+escribir("404.html", no_encontrado())
+
+hoy = datetime.date.today().isoformat()
+urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("lecturas/", hoy), ("acerca/", None), ("apoyar/", None)]
+urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
+sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
+escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
+         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + sm + "</urlset>\n")
+print(f"Sitio generado: {len(ESCRITOS)} escritos, {len(urls)} direcciones en el sitemap.")

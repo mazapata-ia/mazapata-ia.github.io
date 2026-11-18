@@ -1,0 +1,63 @@
+{
+  "sitio": {
+    "nombre": "La Biblioteca",
+    "autora": "Mariana Zapata",
+    "url": "https://mazapata-ia.github.io/mariana.zapata",
+    "base": "/mariana.zapata/",
+    "descripcion": "Un espacio para pensar, sentir y escribir sobre la experiencia humana. Textos breves, textos largos y lecturas de Mariana Zapata.",
+    "google_verificacion": "",
+    "apoyo": {
+      "texto": "Este espacio se sostiene con tiempo, lecturas y escritura. Si algo de lo que encuentras aquí te acompaña, puedes apoyar su continuidad con un aporte libre.",
+      "opciones": [
+        {
+          "plataforma": "Ko-fi",
+          "detalle": "Aporte único o mensual, con tarjeta o PayPal",
+          "url": ""
+        },
+        {
+          "plataforma": "PayPal",
+          "detalle": "Para aportes desde cualquier país",
+          "url": ""
+        },
+        {
+          "plataforma": "Nequi / Bancolombia",
+          "detalle": "Para aportes desde Colombia",
+          "url": ""
+        }
+      ]
+    }
+  },
+  "escritos": [
+    {
+      "id": "muestra-breves",
+      "seccion": "breves",
+      "muestra": true,
+      "titulo": "Lo breve",
+      "fecha": "2026-11-17",
+      "cita": "Fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.",
+      "cuerpo": "Aquí vivirán los textos breves: fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.\n\nEste texto es una muestra del diseño. Se reemplaza con el primer escrito de esta sección."
+    },
+    {
+      "id": "muestra-largos",
+      "seccion": "largos",
+      "muestra": true,
+      "titulo": "Lo extenso",
+      "fecha": "2026-11-17",
+      "cita": "Ensayos y crónicas que piden más tiempo, más páginas y una lectura sin prisa.",
+      "cuerpo": "Aquí vivirán los textos largos: ensayos y crónicas que piden más tiempo, más páginas y una lectura sin prisa.\n\nCada texto largo se presenta con una letra capital al inicio, una columna de lectura cómoda y el tiempo estimado de lectura junto al título.\n\nLos párrafos, la puntuación, las comillas y los saltos de línea se conservan tal como la autora los entrega.\n\nEste texto es una muestra del diseño. Se reemplaza con el primer escrito de esta sección."
+    },
+    {
+      "id": "muestra-lecturas",
+      "seccion": "lecturas",
+      "muestra": true,
+      "titulo": "Lo que se lee",
+      "fecha": "2026-11-17",
+      "obra": {
+        "titulo": "Título del libro o artículo",
+        "autor": "Autora o autor"
+      },
+      "cita": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos.",
+      "cuerpo": "Aquí vivirán las lecturas que me atraviesan: reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos.\n\nCada reflexión indica la obra y su autor o autora debajo del título.\n\nEste texto es una muestra del diseño. Se reemplaza con la primera lectura de esta sección."
+    }
+  ]
+}
