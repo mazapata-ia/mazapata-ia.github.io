@@ -26,7 +26,7 @@ SECCIONES = {
     "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
     "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos"},
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
-                 "desc": "Reflexiones sobre libros y artículos leídos"},
+                 "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas"},
 }
 ORDEN = ["breves", "largos", "lecturas"]
 GENERADAS = ["breves", "largos", "lecturas", "acerca", "apoyar", "escritos"]
@@ -230,17 +230,21 @@ def entrada_indice(x):
 
 
 def portada():
-    reales = [x for x in ESCRITOS if not x.get("muestra")]
-    base = reales or ESCRITOS
-    dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0))) if base else None
-    pills = f'<a class="pill" href="#titulo-indice" aria-current="true">Todo</a>' + "".join(
+    pills = f'<a class="pill" href="#ultimos" aria-current="true">Todo</a>' + "".join(
         f'<a class="pill" href="{BASE}{k}/">{SECCIONES[k]["corto"]}</a>' for k in ORDEN)
     dest_html = ""
-    if dest:
+    for k in ORDEN:
+        lista = por_seccion(k)
+        reales = [x for x in lista if not x.get("muestra")]
+        base = reales or lista
+        if not base:
+            continue
+        dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
         u = url_escrito(dest)
-        dest_html = f"""
-  <section class="featured" aria-label="Último escrito">
-    <span class="vert mono">{etiqueta(dest)} · {SECCIONES[dest['seccion']]['corto']}</span>
+        ancla = ' id="ultimos"' if not dest_html else ""
+        dest_html += f"""
+  <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
+    <span class="vert mono">{etiqueta(dest)} · {SECCIONES[k]['corto']}</span>
     <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
       <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
       {cubierta(dest)}
@@ -253,20 +257,11 @@ def portada():
     </div>
     <div class="issue"><b>{etiqueta(dest)}</b><span class="mono">{mes_anio(dest['fecha'])} · {minutos(dest)} min</span></div>
   </section>"""
-    cols = ""
-    for k in ORDEN:
-        lista = list(reversed(por_seccion(k)))
-        items = (f'<ul class="entries">{"".join(entrada_indice(x) for x in lista)}</ul>' if lista
-                 else '<p class="empty">El primer texto está en preparación.</p>')
-        cols += f"""<div class="col" data-sec="{k}">
-      <h3 class="mono"><a href="{BASE}{k}/">{SECCIONES[k]['num']} — {SECCIONES[k]['nombre']}</a></h3>
-      {items}
-    </div>"""
     cuerpo = f"""<div class="wrap">
   <section class="hero">
     <div>
       <h1 class="masthead"><span class="l1">La</span><span class="l2">Biblioteca</span></h1>
-      <p class="lede">Biblioteca intelectual que alimenta la escritura. La escritura como el resultado de una exploración intelectual.</p>
+      <p class="lede">La escritura como el resultado de una exploración intelectual.</p>
     </div>
     <div class="hero-right">
       <p class="tagline mono">Un espacio para pensar, sentir y escribir sobre la experiencia humana</p>
@@ -274,10 +269,6 @@ def portada():
     </div>
     <picture class="hero-art"><source srcset="{BASE}assets/grabado-portada.webp" type="image/webp"><img src="{BASE}assets/grabado-portada.jpg" width="900" height="1200" alt="Grabado de una misma persona sentada, en tamaño grande y pequeño, con una cinta verde que cruza el cuerpo. Dibujo de Mariana Zapata."></picture>
   </section>{dest_html}
-  <section class="index" aria-labelledby="titulo-indice">
-    <h2 class="cond" id="titulo-indice">Índice</h2>
-    <div class="cols">{cols}</div>
-  </section>
 </div>"""
     ld = json.dumps({"@context": "https://schema.org", "@type": "WebSite", "name": SITIO["nombre"],
                      "url": URL + "/", "description": SITIO["descripcion"], "inLanguage": "es",

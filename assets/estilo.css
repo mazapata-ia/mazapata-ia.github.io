@@ -235,3 +235,7 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
 .meta picture.cubierta { margin-top: 6px; }
 @media (max-width: 980px) { .row picture.cubierta { width: 80px; } .meta picture.cubierta { display: none; } }
 @media (max-width: 620px) { .row picture.cubierta { width: 64px; grid-column: 2; grid-row: 2; } }
+
+/* Portada: un destacado por sección */
+.featured:last-of-type { margin-bottom: 24px; }
+#ultimos { scroll-margin-top: 24px; }
