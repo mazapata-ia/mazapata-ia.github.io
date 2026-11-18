@@ -220,9 +220,8 @@ def portada():
     reales = [x for x in ESCRITOS if not x.get("muestra")]
     base = reales or ESCRITOS
     dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0))) if base else None
-    pills = '<button class="pill" type="button" data-filtro="todo" aria-pressed="true">Todo</button>' + "".join(
-        f'<button class="pill" type="button" data-filtro="{k}" aria-pressed="false">{SECCIONES[k]["corto"]}</button>'
-        for k in ORDEN)
+    pills = f'<a class="pill" href="#titulo-indice" aria-current="true">Todo</a>' + "".join(
+        f'<a class="pill" href="{BASE}{k}/">{SECCIONES[k]["corto"]}</a>' for k in ORDEN)
     dest_html = ""
     if dest:
         u = url_escrito(dest)
@@ -258,7 +257,7 @@ def portada():
     </div>
     <div class="hero-right">
       <p class="tagline mono">Un espacio para pensar, sentir y escribir sobre la experiencia humana</p>
-      <div class="pills" role="group" aria-label="Filtrar el índice">{pills}</div>
+      <nav class="pills" aria-label="Ir a una sección">{pills}</nav>
     </div>
     {lienzo("portada-biblioteca", "hero-art", "1.1")}
   </section>{dest_html}
