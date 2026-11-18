@@ -23,8 +23,8 @@ VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
-    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "desc": "Escritura de texto corto"},
-    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo"},
+    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
+    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos"},
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
                  "desc": "Reflexiones sobre libros y artículos leídos"},
 }
@@ -92,6 +92,17 @@ def obra(x, cls):
         return ""
     autor = f", de {e(o['autor'])}" if o.get("autor") else ""
     return f'<p class="{cls}">Sobre <em>{e(o["titulo"])}</em>{autor}</p>'
+
+
+def cubierta(x, dens="1.2", mini=False):
+    """Imagen de la sección si existe; si no, grabado generativo único para el escrito."""
+    img = SECCIONES[x["seccion"]].get("imagen")
+    if not img:
+        return lienzo(x["id"], dens=dens)
+    suf = "-mini" if mini else ""
+    return (f'<picture class="cubierta"><source srcset="{BASE}assets/{img}{suf}.webp" type="image/webp">'
+            f'<img src="{BASE}assets/{img}{suf}.jpg" alt="" width="{300 if mini else 900}" '
+            f'height="{400 if mini else 1200}" loading="lazy"></picture>')
 
 
 MUESTRA_TAG = '<span class="tag-muestra">Muestra</span>'
@@ -232,7 +243,7 @@ def portada():
     <span class="vert mono">{etiqueta(dest)} · {SECCIONES[dest['seccion']]['corto']}</span>
     <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
       <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
-      {lienzo(dest["id"], dens="1.2")}
+      {cubierta(dest)}
     </a>
     <div class="body">
       <h2><a href="{u}">{e(dest['titulo'])}</a></h2>
@@ -286,7 +297,7 @@ def seccion(k):
       <span class="n">{etiqueta(x)}</span>
       <div><h2>{e(x['titulo'])}</h2>{ob}<p class="q">{e(extracto(x))}</p></div>
       <span class="d mono">{fecha_larga(x['fecha'])}</span>
-      {lienzo(x["id"], dens="1.2")}
+      {cubierta(x, mini=True)}
     </a></li>"""
     if not filas:
         filas = '<li><p class="empty">El primer texto de esta sección está en preparación.</p></li>'
@@ -327,7 +338,7 @@ def escrito(x):
     cuerpo = f"""<div class="wrap">
   <a class="back mono" href="{BASE}{x['seccion']}/">← {e(S['nombre'])}</a>
   <article class="article">
-    <dl class="meta">{meta}{lienzo(x["id"], dens="1.2")}</dl>
+    <dl class="meta">{meta}{cubierta(x)}</dl>
     <div>
       <h1 class="art-title">{e(x['titulo'])}{tag}</h1>
       {obra(x, "art-obra")}
