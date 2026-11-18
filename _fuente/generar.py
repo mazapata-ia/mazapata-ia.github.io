@@ -163,13 +163,14 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=DM+Mono:wght@400;500&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{BASE}assets/estilo.css?v={VERSION}">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 40'%3E%3Crect width='32' height='40' fill='%231B1A18'/%3E%3Cpath d='M6 30c6-10 14-14 20-22M6 22c5-6 10-9 16-12' stroke='%23F2EEE8' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="{BASE}assets/favicon.png">
+<link rel="apple-touch-icon" href="{BASE}assets/apple-touch-icon.png">
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
     <a class="brand" href="{BASE}" aria-label="{e(SITIO['nombre'])}, inicio">
-      {lienzo("sello-biblioteca", dens="1.7")}
+      <picture class="brand-logo"><source srcset="{BASE}assets/logo-mini.webp" type="image/webp"><img src="{BASE}assets/logo-mini.png" width="34" height="45" alt=""></picture>
       <span>{e(SITIO['nombre'])}</span>
     </a>
     <a class="bar-center mono" href="{BASE}">Escritos · Lecturas</a>
