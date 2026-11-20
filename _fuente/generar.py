@@ -254,6 +254,10 @@ def portada():
         dest_html += f"""
   <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
     <span class="vert mono">{etiqueta(dest)} · {SECCIONES[k]['corto']}</span>
+    <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
+      <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
+      {cubierta(dest)}
+    </a>
     <div class="body">
       <h2><a href="{u}">{e(SECCIONES[k].get('titular') or dest['titulo'])}</a></h2>
       {obra(dest, "obra")}
