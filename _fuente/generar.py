@@ -23,7 +23,7 @@ VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
-    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
+    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
     "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos"},
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
                  "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas"},
@@ -49,7 +49,12 @@ def mes_anio(s):
     return f"{MESES[d.month - 1]} {d.year}"
 
 
+NUM_POEMA = re.compile(r"^[ \t]*(\d+)\.[ \t]*\n")
+
+
 def texto_plano(x):
+    if x.get("poemas"):
+        return "\n\n".join(NUM_POEMA.sub("", t, count=1) for t in x["poemas"])
     if x.get("cuerpo"):
         return x["cuerpo"]
     return re.sub(r"<[^>]+>", " ", html.unescape(x.get("cuerpo_html", "")))
@@ -62,6 +67,9 @@ def minutos(x):
 def extracto(x):
     if x.get("cita"):
         return x["cita"]
+    if x.get("poemas"):
+        lineas = [l.strip() for l in NUM_POEMA.sub("", x["poemas"][0], count=1).split("\n") if l.strip()]
+        return " / ".join(lineas[:4]) + (" …" if len(lineas) > 4 else "")
     p = re.split(r"\n\s*\n", texto_plano(x).strip())[0]
     w = p.split()
     return " ".join(w[:32]) + " …" if len(w) > 32 else p
@@ -246,12 +254,8 @@ def portada():
         dest_html += f"""
   <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
     <span class="vert mono">{etiqueta(dest)} · {SECCIONES[k]['corto']}</span>
-    <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
-      <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
-      {cubierta(dest)}
-    </a>
     <div class="body">
-      <h2><a href="{u}">{e(dest['titulo'])}</a></h2>
+      <h2><a href="{u}">{e(SECCIONES[k].get('titular') or dest['titulo'])}</a></h2>
       {obra(dest, "obra")}
       <p class="excerpt">{e(extracto(dest))}</p>
       <a class="readlink mono" href="{u}">Leer este texto</a>
@@ -286,7 +290,6 @@ def seccion(k):
       <span class="n">{etiqueta(x)}</span>
       <div><h2>{e(x['titulo'])}</h2>{ob}<p class="q">{e(extracto(x))}</p></div>
       <span class="d mono">{fecha_larga(x['fecha'])}</span>
-      {cubierta(x, mini=True)}
     </a></li>"""
     if not filas:
         filas = '<li><p class="empty">El primer texto de esta sección está en preparación.</p></li>'
@@ -302,6 +305,15 @@ def seccion(k):
 
 
 def cuerpo_html(x):
+    if x.get("poemas"):
+        bloques = []
+        for t in x["poemas"]:
+            m = NUM_POEMA.match(t)
+            num = f'<p class="poema-num">{e(m.group(1))}</p>' if m else ""
+            resto = t[m.end():] if m else t
+            estrofas = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", resto) if q)
+            bloques.append(f'<section class="poema">{num}{estrofas}</section>')
+        return "\n".join(bloques)
     if x.get("cuerpo_html"):
         return x["cuerpo_html"]
     partes = re.split(r"\n[ \t]*\n", x["cuerpo"])
@@ -327,7 +339,7 @@ def escrito(x):
     cuerpo = f"""<div class="wrap">
   <a class="back mono" href="{BASE}{x['seccion']}/">← {e(S['nombre'])}</a>
   <article class="article">
-    <dl class="meta">{meta}{cubierta(x)}</dl>
+    <dl class="meta">{meta}</dl>
     <div>
       <h1 class="art-title">{e(x['titulo'])}{tag}</h1>
       {obra(x, "art-obra")}
