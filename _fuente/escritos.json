@@ -95,10 +95,6 @@
       "muestra": true,
       "titulo": "Lo que se lee",
       "fecha": "2026-11-17",
-      "obra": {
-        "titulo": "Título del libro o artículo",
-        "autor": "Autora o autor"
-      },
       "cita": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos.",
       "cuerpo": "Aquí vivirán las lecturas que me atraviesan: reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos.\n\nCada reflexión indica la obra y su autor o autora debajo del título.\n\nEste texto es una muestra del diseño. Se reemplaza con la primera lectura de esta sección."
     }
