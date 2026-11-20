@@ -421,4 +421,5 @@ urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("mu
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + sm + "</urlset>\n")
+escribir("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {URL}/sitemap.xml\n")
 print(f"Sitio generado: {len(ESCRITOS)} escritos, {len(urls)} direcciones en el sitemap.")
