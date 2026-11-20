@@ -256,9 +256,9 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
 .prose .poema-num { margin: 0 0 20px; font-family: var(--display); font-style: italic; font-size: 30px; line-height: 1; letter-spacing: 0; color: var(--accent); white-space: normal; }
 
 /* Sin imagen en el índice ni en cada texto (la portada sí las tiene) */
-.row a { grid-template-columns: 74px minmax(0, 1fr) 150px; }
+.row a { grid-template-columns: minmax(0, 1fr) 190px; }
 @media (max-width: 980px) {
-  .row a { grid-template-columns: 56px minmax(0, 1fr); }
+  .row a { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 620px) {
   .row a { grid-template-columns: minmax(0, 1fr); }

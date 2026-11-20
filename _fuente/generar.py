@@ -253,7 +253,7 @@ def portada():
         ancla = ' id="ultimos"' if not dest_html else ""
         dest_html += f"""
   <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
-    <span class="vert mono">{etiqueta(dest)} · {SECCIONES[k]['corto']}</span>
+    <span class="vert mono">{"Muestra · " if dest.get("muestra") else ""}{SECCIONES[k]['corto']}</span>
     <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
       <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
       {cubierta(dest)}
@@ -264,7 +264,7 @@ def portada():
       <p class="excerpt">{e(extracto(dest))}</p>
       <a class="readlink mono" href="{u}">Leer este texto</a>
     </div>
-    <div class="issue"><b>{etiqueta(dest)}</b><span class="mono">{mes_anio(dest['fecha'])} · {minutos(dest)} min</span></div>
+    <div class="issue">{"<b>Muestra</b>" if dest.get("muestra") else ""}<span class="mono">{mes_anio(dest['fecha'])} · {minutos(dest)} min</span></div>
   </section>"""
     cuerpo = f"""<div class="wrap">
   <section class="hero">
@@ -291,7 +291,6 @@ def seccion(k):
     for x in lista:
         ob = obra(x, "q").replace('class="q"', 'class="q" style="font-style:normal;color:var(--ink)"')
         filas += f"""<li class="row"><a href="{url_escrito(x)}">
-      <span class="n">{etiqueta(x)}</span>
       <div><h2>{e(x['titulo'])}</h2>{ob}<p class="q">{e(extracto(x))}</p></div>
       <span class="d mono">{fecha_larga(x['fecha'])}</span>
     </a></li>"""
@@ -335,7 +334,7 @@ def escrito(x):
         return f'<a href="{url_escrito(y)}"><span class="mono">{rot}</span><span>{e(y["titulo"])}</span></a>'
 
     meta = "".join(f'<div><dt class="mono">{a}</dt><dd>{e(b)}</dd></div>' for a, b in [
-        ("Sección", f"{S['num']} · {S['corto']}"), ("Número", etiqueta(x)),
+        ("Sección", f"{S['num']} · {S['corto']}"),
         ("Fecha", fecha_larga(x["fecha"])), ("Lectura", f"{minutos(x)} min")])
     tag = MUESTRA_TAG if x.get("muestra") else ""
     cita = f'<blockquote class="pull">{e(x["cita"])}</blockquote>' if x.get("cita") else ""
