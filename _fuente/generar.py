@@ -262,10 +262,7 @@ def portada():
   <section class="hero">
     <div>
       <h1 class="masthead"><span>{e(SITIO['nombre'])}</span></h1>
-      <p class="lede">La escritura como el resultado de una exploración intelectual.</p>
-    </div>
-    <div class="hero-right">
-      <p class="tagline mono">Un espacio para pensar, sentir y escribir sobre la experiencia humana</p>
+      <p class="lede">Un espacio para pensar, sentir y escribir sobre la experiencia humana junto a la novedad que emerge constantemente en la sociedad. La escritura como el resultado de una exploración intelectual.</p>
       <nav class="pills" aria-label="Ir a una sección">{pills}</nav>
     </div>
     <picture class="hero-art"><source srcset="{BASE}assets/grabado-portada.webp" type="image/webp"><img src="{BASE}assets/grabado-portada.jpg" width="900" height="1200" alt="Grabado de una misma persona sentada, en tamaño grande y pequeño, con una cinta verde que cruza el cuerpo. Dibujo de Mariana Zapata."></picture>
