@@ -23,7 +23,7 @@ VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
-    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
+    "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "resumen": "Fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
     "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos"},
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
                  "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas"},
@@ -249,22 +249,28 @@ def portada():
         if not base:
             continue
         dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
-        u = url_escrito(dest)
+        S = SECCIONES[k]
+        a_seccion = bool(S.get("titular")) and bool(reales)
+        u = f"{BASE}{k}/" if a_seccion else url_escrito(dest)
+        titular = S.get("titular") or dest["titulo"]
+        resumen = S["resumen"] if a_seccion else extracto(dest)
+        leer = "Ver todos los textos" if a_seccion else "Leer este texto"
+        detalle = f"{len(reales)} textos" if a_seccion else f"{minutos(dest)} min"
         ancla = ' id="ultimos"' if not dest_html else ""
         dest_html += f"""
   <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
     <span class="vert mono">{"Muestra · " if dest.get("muestra") else ""}{SECCIONES[k]['corto']}</span>
-    <a class="cover" href="{u}" aria-label="Leer {e(dest['titulo'])}">
+    <a class="cover" href="{u}" aria-label="{e(leer)}: {e(titular)}">
       <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
       {cubierta(dest)}
     </a>
     <div class="body">
-      <h2><a href="{u}">{e(SECCIONES[k].get('titular') or dest['titulo'])}</a></h2>
+      <h2><a href="{u}">{e(titular)}</a></h2>
       {obra(dest, "obra")}
-      <p class="excerpt">{e(extracto(dest))}</p>
-      <a class="readlink mono" href="{u}">Leer este texto</a>
+      <p class="excerpt">{e(resumen)}</p>
+      <a class="readlink mono" href="{u}">{e(leer)}</a>
     </div>
-    <div class="issue">{"<b>Muestra</b>" if dest.get("muestra") else ""}<span class="mono">{mes_anio(dest['fecha'])} · {minutos(dest)} min</span></div>
+    <div class="issue">{"<b>Muestra</b>" if dest.get("muestra") else ""}<span class="mono">{mes_anio(dest['fecha'])} · {detalle}</span></div>
   </section>"""
     cuerpo = f"""<div class="wrap">
   <section class="hero">
@@ -312,10 +318,9 @@ def cuerpo_html(x):
         bloques = []
         for t in x["poemas"]:
             m = NUM_POEMA.match(t)
-            num = f'<p class="poema-num">{e(m.group(1))}</p>' if m else ""
             resto = t[m.end():] if m else t
             estrofas = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", resto) if q)
-            bloques.append(f'<section class="poema">{num}{estrofas}</section>')
+            bloques.append(f'<section class="poema">{estrofas}</section>')
         return "\n".join(bloques)
     if x.get("cuerpo_html"):
         return x["cuerpo_html"]
