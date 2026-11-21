@@ -393,9 +393,21 @@ def apoyar():
     A = SITIO.get("apoyo", {})
     formas = ""
     for o in A.get("opciones", []):
-        boton = (f'<a class="mono" href="{e(o["url"])}" target="_blank" rel="noopener">Aportar</a>' if o.get("url")
-                 else '<span class="pending mono">Enlace por configurar</span>')
-        formas += f'<li class="way"><div><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>{boton}</li>'
+        tipo = o.get("tipo")
+        cab = f'<div class="aporte-cab"><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>'
+        if tipo == "kofi" and o.get("usuario"):
+            src = f'https://ko-fi.com/{e(o["usuario"])}/?hidefeed=true&amp;widget=true&amp;embed=true'
+            formas += (f'<li class="aporte">{cab}<div class="kofi-marco"><iframe id="kofiframe" src="{src}" '
+                       f'title="Hacer un aporte a Ofrenda en Ko-fi" loading="lazy" height="712"></iframe></div></li>')
+        elif tipo == "breb" and o.get("llave"):
+            qr = (f'<img class="qr" src="{BASE}{e(o["qr"])}" width="180" height="180" alt="Código QR de Bre-B para aportar a Ofrenda">'
+                  if o.get("qr") else "")
+            formas += (f'<li class="aporte">{cab}<div class="breb">{qr}<div><span class="mono">Llave Bre-B</span>'
+                       f'<code class="llave">{e(o["llave"])}</code>'
+                       f'<button class="copiar mono" type="button" data-copiar="{e(o["llave"])}">Copiar llave</button></div></div></li>')
+        elif o.get("url"):
+            formas += (f'<li class="way"><div><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>'
+                       f'<a class="mono" href="{e(o["url"])}" target="_blank" rel="noopener">Aportar</a></li>')
     cuerpo = f"""<div class="wrap"><section class="page">
   <div>
     <p class="mono">V — Apoyar</p>

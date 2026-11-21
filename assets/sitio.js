@@ -103,3 +103,12 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { grabar(true); });
   else grabar(true);
 })();
+
+/* Botón "Copiar llave" (Bre-B) */
+document.addEventListener("click", function (ev) {
+  var b = ev.target.closest && ev.target.closest("[data-copiar]");
+  if (!b) return;
+  var t = b.getAttribute("data-copiar"), orig = b.textContent;
+  var listo = function () { b.textContent = "Copiada"; setTimeout(function () { b.textContent = orig; }, 1800); };
+  if (navigator.clipboard) { navigator.clipboard.writeText(t).then(listo, function () {}); }
+});

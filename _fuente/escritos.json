@@ -10,19 +10,17 @@
       "texto": "Aquí trabajamos con la sensación de que cada pensamiento genera emociones a las que no les hallamos nombre, y que solo podemos describir como introspección. Si algo de lo que encuentras aquí te acompaña, puedes apoyar su continuidad con un aporte libre.",
       "opciones": [
         {
-          "plataforma": "Ko-fi",
-          "detalle": "Aporte único o mensual, con tarjeta o PayPal",
-          "url": ""
+          "tipo": "kofi",
+          "plataforma": "Desde cualquier país",
+          "detalle": "Con tarjeta o PayPal, sin salir de esta página.",
+          "usuario": "ofrenda"
         },
         {
-          "plataforma": "PayPal",
-          "detalle": "Para aportes desde cualquier país",
-          "url": ""
-        },
-        {
-          "plataforma": "Nequi / Bancolombia",
-          "detalle": "Para aportes desde Colombia",
-          "url": ""
+          "tipo": "breb",
+          "plataforma": "Desde Colombia · Bre-B",
+          "detalle": "Escanea el código con la app de tu banco o de Nequi, o copia la llave.",
+          "llave": "",
+          "qr": ""
         }
       ]
     }
