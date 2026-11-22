@@ -350,3 +350,20 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
 /* Poemas cortos: centrados en la hoja, sin salirse de los renglones */
 .hoja.corta { padding-top: calc(var(--renglon) * (2 + var(--arriba, 0))); }
 @media (max-width: 620px) { .hoja { min-height: calc(var(--renglon) * 17); } }
+
+/* Bre-B: bloque introspectivo */
+.breb { display: block; padding: 10px; border: 0; background: var(--ink); color: var(--paper); }
+.breb-marco { border: 1px solid rgba(242, 238, 232, .6); padding: 28px 28px 26px; }
+.breb-et { margin: 0 0 22px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: rgba(242, 238, 232, .55); }
+.breb-cuerpo { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 30px; align-items: center; }
+.breb-qr { background: #fff; padding: 10px; }
+.breb-qr img { display: block; width: 100%; height: auto; }
+.breb-llave .mono { display: block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(242, 238, 232, .55); }
+.breb .llave { display: block; font-family: var(--display); font-style: italic; font-size: clamp(26px, 3vw, 34px); margin: 8px 0 18px; color: var(--paper); }
+.breb .copiar { background: var(--paper); color: var(--ink); }
+.breb-nota { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid rgba(242, 238, 232, .22); font-family: var(--display); font-style: italic; font-size: 15px; line-height: 1.5; color: rgba(242, 238, 232, .72); max-width: 34ch; }
+@media (max-width: 620px) {
+  .breb-marco { padding: 22px 18px; }
+  .breb-cuerpo { grid-template-columns: 1fr; gap: 22px; }
+  .breb-qr { max-width: 240px; }
+}

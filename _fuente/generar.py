@@ -479,11 +479,16 @@ def apoyar():
             formas += (f'<li class="aporte">{cab}<div class="kofi-marco"><iframe id="kofiframe" src="{src}" '
                        f'title="Hacer un aporte a Ofrenda en Ko-fi" loading="lazy" height="550"></iframe></div></li>')
         elif tipo == "breb" and o.get("llave"):
-            qr = (f'<img class="qr" src="{BASE}{e(o["qr"])}" width="180" height="180" alt="Código QR de Bre-B para aportar a Ofrenda">'
-                  if o.get("qr") else "")
-            formas += (f'<li class="aporte">{cab}<div class="breb">{qr}<div><span class="mono">Llave Bre-B</span>'
+            qr = (f'<div class="breb-qr"><img src="{BASE}{e(o["qr"])}" width="600" height="600" '
+                  f'alt="Código QR de Bre-B para aportar a Ofrenda"></div>' if o.get("qr") else "")
+            formas += (f'<li class="aporte">{cab}<div class="breb"><div class="breb-marco">'
+                       f'<p class="breb-et mono">Un gesto desde aquí</p>'
+                       f'<div class="breb-cuerpo">{qr}<div class="breb-llave">'
+                       f'<span class="mono">Llave Bre-B</span>'
                        f'<code class="llave">{e(o["llave"])}</code>'
-                       f'<button class="copiar mono" type="button" data-copiar="{e(o["llave"])}">Copiar llave</button></div></div></li>')
+                       f'<button class="copiar mono" type="button" data-copiar="{e(o["llave"])}">Copiar llave</button>'
+                       f'<p class="breb-nota">Al transferir, tu app te mostrará el nombre de quien recibe, en parte oculto, para que confirmes que es correcto.</p>'
+                       f'</div></div></div></div></li>')
         elif o.get("url"):
             formas += (f'<li class="way"><div><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>'
                        f'<a class="mono" href="{e(o["url"])}" target="_blank" rel="noopener">Aportar</a></li>')

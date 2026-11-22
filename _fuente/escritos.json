@@ -18,9 +18,9 @@
         {
           "tipo": "breb",
           "plataforma": "Desde Colombia · Bre-B",
-          "detalle": "Escanea el código con la app de tu banco o de Nequi, o copia la llave.",
-          "llave": "",
-          "qr": ""
+          "detalle": "Escanea el código con la app de tu banco o de Nequi, o copia la llave. Sin comisiones: tu aporte llega completo.",
+          "llave": "@mariana2204",
+          "qr": "assets/breb-qr.png"
         }
       ]
     }
