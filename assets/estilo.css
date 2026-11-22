@@ -367,3 +367,24 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
   .breb-cuerpo { grid-template-columns: 1fr; gap: 22px; }
   .breb-qr { max-width: 240px; }
 }
+
+/* Aportes: Ko-fi en el mismo cuadro oscuro que Bre-B */
+.breb.kofi .breb-marco { padding-bottom: 28px; }
+.kofi-panel { background: #fff; padding: 6px; }
+.kofi-panel iframe { display: block; width: 100%; border: 0; background: #fff; }
+
+/* Logo oficial en Apoyar y en la franja de apoyo */
+picture.logo-oficial, picture.logo-oficial img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; }
+picture.logo-banda, picture.logo-banda img { display: block; width: 90px; height: 120px; }
+.support-band .wrap { grid-template-columns: 90px minmax(0, 1fr) auto; }
+@media (max-width: 620px) { picture.logo-banda { display: none; } .support-band .wrap { grid-template-columns: 1fr; } }
+
+/* Dibujo de la autora en Textos largos y Lecturas */
+.lado { display: grid; gap: 48px; align-content: start; }
+.dibujo-lado { margin: 0; position: sticky; top: 28px; }
+.dibujo-lado img, .dibujo-final img { display: block; width: 100%; height: auto; }
+.dibujo-final { display: none; margin: 48px auto 8px; max-width: 220px; }
+@media (max-width: 980px) {
+  .dibujo-lado { display: none; }
+  .dibujo-final { display: block; }
+}

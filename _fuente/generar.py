@@ -141,7 +141,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
     banda_html = f"""
 <section class="support-band" aria-label="Apoyar este espacio">
   <div class="wrap">
-    {lienzo("apoyo-sello", dens="2")}
+    <picture class="logo-banda"><source srcset="{BASE}assets/logo-mini.webp" type="image/webp"><img src="{BASE}assets/logo-mini.png" width="90" height="120" alt=""></picture>
     <div>
       <h2>Sostener Ofrenda</h2>
       <p>{e(apoyo.get("texto", ""))}</p>
@@ -412,10 +412,16 @@ def escrito(x):
     tag = MUESTRA_TAG if x.get("muestra") else ""
     cita = f'<blockquote class="pull">{e(x["cita"])}</blockquote>' if x.get("cita") else ""
     drop = " drop" if x["seccion"] == "largos" else ""
+    con_dibujo = x["seccion"] in ("largos", "lecturas")
+    fig = lambda cls: (f'<figure class="{cls}"><picture><source srcset="{BASE}assets/dibujo-hilo.webp" type="image/webp">'
+                       f'<img src="{BASE}assets/dibujo-hilo.png" width="600" height="1217" loading="lazy" '
+                       f'alt="Dibujo en línea verde de una persona que sostiene un hilo; arriba, el hilo se enreda. Dibujo de {e(SITIO["autora"])}."></picture></figure>')
+    lado = fig("dibujo-lado") if con_dibujo else ""
+    final = fig("dibujo-final") if con_dibujo else ""
     cuerpo = f"""<div class="wrap">
   <a class="back mono" href="{BASE}{x['seccion']}/">← {e(S['nombre'])}</a>
   <article class="article">
-    <dl class="meta">{meta}</dl>
+    <div class="lado"><dl class="meta">{meta}</dl>{lado}</div>
     <div>
       <h1 class="art-title">{e(x['titulo'])}{tag}</h1>
       {obra(x, "art-obra")}
@@ -423,6 +429,7 @@ def escrito(x):
       <div class="prose{drop}">
 {cuerpo_html(x)}
       </div>
+      {final}
       <div class="signoff"><span class="mono">{e(SITIO['autora'])}</span><a class="mono" href="{BASE}apoyar/">Apoyar este espacio</a></div>
       <nav class="pager" aria-label="Otros textos de la sección">{enlace(lista[i - 1] if i > 0 else None, "← Anterior")}{enlace(lista[i + 1] if i + 1 < len(lista) else None, "Siguiente →")}</nav>
     </div>
@@ -476,8 +483,11 @@ def apoyar():
         cab = f'<div class="aporte-cab"><b>{e(o["plataforma"])}</b><small>{e(o.get("detalle", ""))}</small></div>'
         if tipo == "kofi" and o.get("usuario"):
             src = f'https://ko-fi.com/{e(o["usuario"])}/?hidefeed=true&amp;widget=true&amp;embed=true'
-            formas += (f'<li class="aporte">{cab}<div class="kofi-marco"><iframe id="kofiframe" src="{src}" '
-                       f'title="Hacer un aporte a Ofrenda en Ko-fi" loading="lazy" height="550"></iframe></div></li>')
+            formas += (f'<li class="aporte">{cab}<div class="breb kofi"><div class="breb-marco">'
+                       f'<p class="breb-et mono">Un gesto desde cualquier lugar</p>'
+                       f'<div class="kofi-panel"><iframe id="kofiframe" src="{src}" '
+                       f'title="Hacer un aporte a Ofrenda en Ko-fi" loading="lazy" height="550"></iframe></div>'
+                       f'</div></div></li>')
         elif tipo == "breb" and o.get("llave"):
             qr = (f'<div class="breb-qr"><img src="{BASE}{e(o["qr"])}" width="600" height="600" '
                   f'alt="Código QR de Bre-B para aportar a Ofrenda"></div>' if o.get("qr") else "")
@@ -500,7 +510,7 @@ def apoyar():
     <ul class="ways">{formas}</ul>
     <p class="note">Los aportes se procesan en la plataforma elegida; este sitio no guarda datos de pago. Gracias por leer.</p>
   </div>
-  <aside>{lienzo("apoyo-pagina", dens="1.3")}</aside>
+  <aside><picture class="logo-oficial"><source srcset="{BASE}assets/grabado-portada.webp" type="image/webp"><img src="{BASE}assets/grabado-portada.jpg" width="900" height="1200" loading="lazy" alt="Grabado de Ofrenda: una misma persona sentada, en tamaño grande y pequeño, con una cinta verde."></picture></aside>
 </section></div>"""
     return pagina("apoyar/", "Apoyar", "Formas de apoyar Ofrenda, el espacio de escritura de " + SITIO["autora"] + ".",
                   cuerpo, banda=False)
