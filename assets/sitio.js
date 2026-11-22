@@ -129,7 +129,7 @@ document.addEventListener("click", function (ev) {
       if (!q) return;
       var p = document.createElement("p"); p.textContent = q; texto.appendChild(p);
     });
-    fuente.textContent = "De «" + a.titulo + "»";
+    fuente.textContent = a.fuente;
     fuente.href = a.url;
     actual = i;
   }
@@ -153,3 +153,53 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
   a.textContent = c;
   a.href = "mailto:" + c;
 });
+
+/* Cuaderno: pasar la página */
+(function () {
+  var c = document.querySelector(".cuaderno");
+  if (!c) return;
+  var hojas = [].slice.call(c.querySelectorAll(".hoja"));
+  if (!hojas.length) return;
+  var ant = c.querySelector(".ant"), sig = c.querySelector(".sig"), cuenta = c.querySelector(".cuenta");
+  var i = 0;
+  function desdeHash() {
+    var m = /^#poema-(\d+)$/.exec(location.hash);
+    return m ? Math.min(Math.max(parseInt(m[1], 10) - 1, 0), hojas.length - 1) : 0;
+  }
+  function ir(n, atras, desplazar) {
+    if (n < 0 || n >= hojas.length) return;
+    hojas[i].classList.remove("actual");
+    i = n;
+    c.classList.toggle("atras", !!atras);
+    void hojas[i].offsetWidth;
+    hojas[i].classList.add("actual");
+    cuenta.textContent = (i + 1) + " / " + hojas.length;
+    ant.disabled = i === 0;
+    sig.disabled = i === hojas.length - 1;
+    try { history.replaceState(null, "", "#poema-" + (i + 1)); } catch (e) {}
+    if (desplazar) {
+      var top = c.getBoundingClientRect().top + window.pageYOffset - 90;
+      if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: "smooth" });
+    }
+  }
+  c.classList.add("activo");
+  i = desdeHash();
+  ir(i, false, false);
+  if (location.hash) setTimeout(function () { c.scrollIntoView({ block: "start" }); }, 0);
+  ant.addEventListener("click", function () { ir(i - 1, true, true); });
+  sig.addEventListener("click", function () { ir(i + 1, false, true); });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.target.closest && ev.target.closest("input, textarea")) return;
+    if (ev.key === "ArrowRight") ir(i + 1, false, true);
+    if (ev.key === "ArrowLeft") ir(i - 1, true, true);
+  });
+  window.addEventListener("hashchange", function () { var n = desdeHash(); if (n !== i) ir(n, n < i, true); });
+  var x0 = null, y0 = null;
+  c.addEventListener("touchstart", function (ev) { x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; }, { passive: true });
+  c.addEventListener("touchend", function (ev) {
+    if (x0 === null) return;
+    var dx = ev.changedTouches[0].clientX - x0, dy = ev.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) { if (dx < 0) ir(i + 1, false, true); else ir(i - 1, true, true); }
+    x0 = null;
+  }, { passive: true });
+})();

@@ -117,6 +117,8 @@ MUESTRA_TAG = '<span class="tag-muestra">Muestra</span>'
 
 # ---------- numeración ----------
 ESCRITOS = DATOS["escritos"]
+CUADERNO = DATOS.get("cuaderno") or {"poemas": []}
+POEMAS = CUADERNO["poemas"]
 n = 0
 for x in sorted(ESCRITOS, key=lambda x: fecha(x["fecha"])):
     if not x.get("muestra"):
@@ -242,15 +244,18 @@ def entrada_indice(x):
 def pantalla_html():
     """Pantalla de la portada: muestra al azar uno de los textos publicados."""
     pool = []
+    for i, t in enumerate(POEMAS, 1):
+        pool.append({"t": NUM_POEMA.sub("", t, count=1), "fuente": f"Cuaderno · {i} / {len(POEMAS)}",
+                     "url": f"{BASE}breves/#poema-{i}"})
     for x in sorted(ESCRITOS, key=lambda y: (y["fecha"], y.get("numero", 0))):
         if x.get("muestra"):
             continue
         u = url_escrito(x)
         if x.get("poemas"):
             for t in x["poemas"]:
-                pool.append({"t": NUM_POEMA.sub("", t, count=1), "titulo": x["titulo"], "url": u})
+                pool.append({"t": NUM_POEMA.sub("", t, count=1), "fuente": f"De «{x['titulo']}»", "url": u})
         else:
-            pool.append({"t": extracto(x), "titulo": x["titulo"], "url": u})
+            pool.append({"t": extracto(x), "fuente": f"De «{x['titulo']}»", "url": u})
     if not pool:
         return ""
     a = pool[0]
@@ -259,7 +264,7 @@ def pantalla_html():
     return (f'<aside class="pantalla" aria-label="Un texto de Ofrenda al azar"><div class="pantalla-marco">'
             f'<p class="pantalla-et mono">Al azar</p>'
             f'<div class="pantalla-texto" aria-live="polite">{estrofas}</div>'
-            f'<div class="pantalla-pie"><a class="pantalla-fuente mono" href="{a["url"]}">De «{e(a["titulo"])}»</a>'
+            f'<div class="pantalla-pie"><a class="pantalla-fuente mono" href="{a["url"]}">{e(a["fuente"])}</a>'
             f'<button class="pantalla-otro mono" type="button">Otro texto</button></div>'
             f'</div></aside><script type="application/json" id="pantalla-datos">{datos}</script>')
 
@@ -272,7 +277,11 @@ def portada():
         reales = [x for x in por_seccion(k) if not x.get("muestra")]
         u = f"{BASE}{k}/"
         titular = S["titular"]
-        if reales:
+        if k == "breves" and POEMAS:
+            tab = "Nuevo"
+            detalle = f"{mes_anio(CUADERNO['fecha'])} · {len(POEMAS)} textos"
+            leer = "Abrir el cuaderno"
+        elif reales:
             dest = max(reales, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
             tab = "Nuevo"
             detalle = f"{mes_anio(dest['fecha'])} · " + ("1 texto" if len(reales) == 1 else f"{len(reales)} textos")
@@ -313,7 +322,37 @@ def portada():
                   extra_head=f'<script type="application/ld+json">{ld}</script>')
 
 
+def cuaderno():
+    S = SECCIONES["breves"]
+    n = len(POEMAS)
+    hojas = ""
+    for i, t in enumerate(POEMAS, 1):
+        resto = NUM_POEMA.sub("", t, count=1)
+        estrofas = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", resto) if q)
+        hojas += (f'<article class="hoja" id="poema-{i}" data-n="{i}" aria-label="Página {i} de {n}">'
+                  f'<div class="hoja-texto">{estrofas}</div><p class="folio mono">{i}</p></article>')
+    cuerpo = f"""<div class="wrap">
+  <header class="sec-head">
+    <span class="roman">{S['num']}</span>
+    <h1>{e(S['nombre'])}</h1>
+    <p class="mono">{e(S['desc'])} · {n} textos</p>
+  </header>
+  <section class="cuaderno" aria-label="Cuaderno de textos breves">
+    <nav class="pasar" aria-label="Pasar página">
+      <button class="ant mono" type="button" aria-label="Página anterior">← Anterior</button>
+      <span class="cuenta mono" aria-live="polite">1 / {n}</span>
+      <button class="sig mono" type="button" aria-label="Página siguiente">Siguiente →</button>
+    </nav>
+    <div class="hojas">{hojas}</div>
+    <p class="pista mono">Desliza o usa las flechas para pasar la página</p>
+  </section>
+</div>"""
+    return pagina("breves/", S["nombre"], f"Cuaderno de textos breves de {SITIO['autora']}.", cuerpo)
+
+
 def seccion(k):
+    if k == "breves" and POEMAS:
+        return cuaderno()
     S = SECCIONES[k]
     lista = list(reversed(por_seccion(k)))
     reales = len([x for x in lista if not x.get("muestra")])
@@ -415,12 +454,12 @@ def quien_habita():
     return pagina("quien-habita/", "Quién habita", f"{SITIO['autora']}, quien escribe Ofrenda.", cuerpo)
 
 
-def redireccion(destino):
+def redireccion(destino, texto="Ir a Quién habita"):
     u = f"{BASE}{destino}"
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ofrenda</title>
 <link rel="canonical" href="{URL}/{destino}"><meta name="robots" content="noindex">
 <meta http-equiv="refresh" content="0; url={u}"></head>
-<body><p><a href="{u}">Ir a Quién habita</a></p></body></html>
+<body><p><a href="{u}">{texto}</a></p></body></html>
 """
 
 
@@ -478,6 +517,8 @@ for k in ORDEN:
     escribir(f"{k}/index.html", seccion(k))
 for x in ESCRITOS:
     escribir(f"escritos/{x['id']}/index.html", escrito(x))
+for viejo, num in CUADERNO.get("antiguas", {}).items():
+    escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/#poema-{num}", "Ir al cuaderno"))
 escribir("quien-habita/index.html", quien_habita())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())

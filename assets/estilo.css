@@ -309,3 +309,41 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
   .habita { grid-template-columns: 1fr; }
   .habita aside { display: block; grid-row: 1; max-width: 420px; width: 100%; }
 }
+
+/* Cuaderno de textos breves */
+.cuaderno { --renglon: 32px; max-width: 680px; margin: 8px auto 72px; }
+.pasar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 18px; }
+.pasar button { background: none; border: 1px solid var(--ink); color: var(--ink); border-radius: 999px; padding: 10px 18px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; cursor: pointer; }
+.pasar button:disabled { opacity: .3; cursor: default; }
+.cuenta { font-size: 12px; letter-spacing: .2em; }
+.hojas { display: grid; gap: 28px; }
+.hoja { position: relative; background-color: #FBF8F3;
+  background-image: linear-gradient(to right, transparent 54px, rgba(78, 107, 103, .55) 54px, rgba(78, 107, 103, .55) 55px, transparent 55px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--renglon) - 1px), rgba(27, 26, 24, .09) calc(var(--renglon) - 1px), rgba(27, 26, 24, .09) var(--renglon));
+  background-position: 0 0, 0 calc(var(--renglon) * 2);
+  box-shadow: 0 1px 0 rgba(27, 26, 24, .06), 0 14px 34px -18px rgba(27, 26, 24, .35);
+  border: 1px solid rgba(27, 26, 24, .12);
+  padding: calc(var(--renglon) * 2) 34px calc(var(--renglon) * 2) 82px; min-height: calc(var(--renglon) * 17); }
+.hoja-texto { font-family: var(--display); font-size: 19px; line-height: var(--renglon); }
+.hoja-texto p { margin: 0 0 var(--renglon); white-space: pre-wrap; }
+.hoja-texto p:last-child { margin-bottom: 0; }
+.folio { position: absolute; right: 26px; bottom: 18px; margin: 0; font-size: 11px; letter-spacing: .16em; color: var(--ink-soft); }
+.pista { display: none; text-align: center; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); margin-top: 16px; }
+/* Con JavaScript: una página a la vez */
+.cuaderno.activo .hojas { display: block; }
+.cuaderno.activo .hoja { display: none; }
+.cuaderno.activo .hoja.actual { display: block; animation: hoja-sig .45s ease both; }
+.cuaderno.activo.atras .hoja.actual { animation-name: hoja-ant; }
+.cuaderno.activo .pista { display: block; }
+.cuaderno:not(.activo) .pasar { display: none; }
+@keyframes hoja-sig { from { opacity: 0; transform: translateX(28px) rotate(.6deg); } to { opacity: 1; transform: none; } }
+@keyframes hoja-ant { from { opacity: 0; transform: translateX(-28px) rotate(-.6deg); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cuaderno.activo .hoja.actual { animation: none; } }
+@media (max-width: 620px) {
+  .cuaderno { --renglon: 29px; }
+  .hoja { background-image: linear-gradient(to right, transparent 30px, rgba(78, 107, 103, .55) 30px, rgba(78, 107, 103, .55) 31px, transparent 31px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--renglon) - 1px), rgba(27, 26, 24, .09) calc(var(--renglon) - 1px), rgba(27, 26, 24, .09) var(--renglon));
+    padding: calc(var(--renglon) * 2) 18px calc(var(--renglon) * 2) 44px; min-height: calc(var(--renglon) * 15); }
+  .hoja-texto { font-size: 17px; }
+  .pasar button { padding: 9px 13px; }
+}
