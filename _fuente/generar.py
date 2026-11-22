@@ -29,7 +29,7 @@ SECCIONES = {
                  "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas", "titular": "Lo que se lee", "resumen": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos."},
 }
 ORDEN = ["breves", "largos", "lecturas"]
-GENERADAS = ["breves", "largos", "lecturas", "acerca", "apoyar", "escritos"]
+GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "escritos"]
 
 e = lambda s: html.escape(str(s), quote=True)
 
@@ -199,7 +199,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
       <li><a href="{BASE}breves/"><span class="mono">I</span><span>Textos breves</span></a></li>
       <li><a href="{BASE}largos/"><span class="mono">II</span><span>Textos largos</span></a></li>
       <li><a href="{BASE}lecturas/"><span class="mono">III</span><span>Lecturas que me atraviesan</span></a></li>
-      <li><a href="{BASE}acerca/"><span class="mono">IV</span><span>Acerca de este espacio</span></a></li>
+      <li><a href="{BASE}quien-habita/"><span class="mono">IV</span><span>Quién habita</span></a></li>
       <li><a href="{BASE}apoyar/"><span class="mono">V</span><span>Apoyar</span></a></li>
     </ol>
   </div>
@@ -213,7 +213,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   <div class="wrap">
     <span class="mono">{e(SITIO['nombre'])} · {e(SITIO['autora'])}</span>
     <nav class="mono" aria-label="Pie">
-      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}acerca/">Acerca</a><a href="{BASE}apoyar/">Apoyar</a>
+      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a>
     </nav>
   </div>
 </footer>
@@ -397,20 +397,31 @@ def escrito(x):
                   indexar=not x.get("muestra"), tipo="article", extra_head=extra)
 
 
-def acerca():
-    secs = "".join(f"""<li><a href="{BASE}{k}/"><span class="mono">{SECCIONES[k]['num']}</span>
-      <div><b>{SECCIONES[k]['nombre']}</b><small>{SECCIONES[k]['desc']}</small></div></a></li>""" for k in ORDEN)
-    cuerpo = f"""<div class="wrap"><section class="page">
+def quien_habita():
+    usuario, dominio = "mazapatatrabajo", "gmail.com"
+    cuerpo = f"""<div class="wrap"><section class="page habita">
   <div>
-    <p class="mono">Acerca de este espacio</p>
-    <h1>Biblioteca intelectual que alimenta la escritura</h1>
-    <p class="big">Un espacio para pensar, sentir y escribir sobre la experiencia humana.</p>
-    <p>La escritura como el resultado de una exploración intelectual. Aquí se publican textos terminados de {e(SITIO['autora'])}, organizados en tres secciones.</p>
-    <ul class="secs">{secs}</ul>
+    <p class="mono">IV — Quién habita</p>
+    <h1>Quién habita</h1>
+    <p class="nombre">{e(SITIO['autora'])}</p>
+    <p class="big">Pronto, unas palabras sobre quien escribe estas páginas: de dónde viene su escritura, qué la mueve y desde dónde mira el mundo.</p>
+    <div class="contacto">
+      <span class="mono">Escríbeme</span>
+      <a class="correo" data-u="{usuario}" data-d="{dominio}" href="#">{usuario} [arroba] {dominio.replace(".", " [punto] ")}</a>
+    </div>
   </div>
-  <aside>{lienzo("acerca-biblioteca", dens="1.1")}</aside>
+  <aside><picture class="retrato"><source srcset="{BASE}assets/mariana.webp" type="image/webp"><img src="{BASE}assets/mariana.jpg" width="900" height="1125" alt="Retrato de {e(SITIO['autora'])}, de brazos cruzados, con camiseta negra sobre un fondo gris verdoso."></picture></aside>
 </section></div>"""
-    return pagina("acerca/", "Acerca de este espacio", SITIO["descripcion"], cuerpo)
+    return pagina("quien-habita/", "Quién habita", f"{SITIO['autora']}, quien escribe Ofrenda.", cuerpo)
+
+
+def redireccion(destino):
+    u = f"{BASE}{destino}"
+    return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ofrenda</title>
+<link rel="canonical" href="{URL}/{destino}"><meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url={u}"></head>
+<body><p><a href="{u}">Ir a Quién habita</a></p></body></html>
+"""
 
 
 def apoyar():
@@ -467,12 +478,13 @@ for k in ORDEN:
     escribir(f"{k}/index.html", seccion(k))
 for x in ESCRITOS:
     escribir(f"escritos/{x['id']}/index.html", escrito(x))
-escribir("acerca/index.html", acerca())
+escribir("quien-habita/index.html", quien_habita())
+escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
 escribir("404.html", no_encontrado())
 
 hoy = datetime.date.today().isoformat()
-urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("lecturas/", hoy), ("acerca/", None), ("apoyar/", None)]
+urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("lecturas/", hoy), ("quien-habita/", None), ("apoyar/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'

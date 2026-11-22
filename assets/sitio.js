@@ -146,3 +146,10 @@ document.addEventListener("click", function (ev) {
     setTimeout(function () { pintar(i); texto.classList.remove("cambia"); }, 350);
   });
 })();
+
+/* Correo armado en el navegador (para que los robots no lo recojan) */
+document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
+  var c = a.dataset.u + "@" + a.dataset.d;
+  a.textContent = c;
+  a.href = "mailto:" + c;
+});
