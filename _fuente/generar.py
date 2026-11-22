@@ -24,9 +24,9 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
     "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "resumen": "Fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
-    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos"},
+    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos", "titular": "Lo extenso", "resumen": "Ensayos y crónicas que piden más tiempo, más páginas y una lectura sin prisa."},
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
-                 "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas"},
+                 "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas", "titular": "Lo que se lee", "resumen": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos."},
 }
 ORDEN = ["breves", "largos", "lecturas"]
 GENERADAS = ["breves", "largos", "lecturas", "acerca", "apoyar", "escritos"]
@@ -268,34 +268,33 @@ def portada():
         f'<a class="pill" href="{BASE}{k}/">{SECCIONES[k]["corto"]}</a>' for k in ORDEN)
     dest_html = ""
     for k in ORDEN:
-        lista = por_seccion(k)
-        reales = [x for x in lista if not x.get("muestra")]
-        base = reales or lista
-        if not base:
-            continue
-        dest = max(base, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
         S = SECCIONES[k]
-        a_seccion = bool(S.get("titular")) and bool(reales)
-        u = f"{BASE}{k}/" if a_seccion else url_escrito(dest)
-        titular = S.get("titular") or dest["titulo"]
-        resumen = S["resumen"] if a_seccion else extracto(dest)
-        leer = "Ver todos los textos" if a_seccion else "Leer este texto"
-        detalle = f"{len(reales)} textos" if a_seccion else f"{minutos(dest)} min"
+        reales = [x for x in por_seccion(k) if not x.get("muestra")]
+        u = f"{BASE}{k}/"
+        titular = S["titular"]
+        if reales:
+            dest = max(reales, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
+            tab = "Nuevo"
+            detalle = f"{mes_anio(dest['fecha'])} · " + ("1 texto" if len(reales) == 1 else f"{len(reales)} textos")
+            leer = "Ver todos los textos"
+        else:
+            tab = "Pronto"
+            detalle = "En preparación"
+            leer = "Ver la sección"
         ancla = ' id="ultimos"' if not dest_html else ""
         dest_html += f"""
-  <section class="featured"{ancla} aria-label="{e(SECCIONES[k]['nombre'])}: último texto">
-    <span class="vert mono">{"Muestra · " if dest.get("muestra") else ""}{SECCIONES[k]['corto']}</span>
+  <section class="featured"{ancla} aria-label="{e(S['nombre'])}">
+    <span class="vert mono">{S['corto']}</span>
     <a class="cover" href="{u}" aria-label="{e(leer)}: {e(titular)}">
-      <span class="tab mono">{"Muestra" if dest.get("muestra") else "Nuevo"}</span>
-      {cubierta(dest)}
+      <span class="tab mono">{tab}</span>
+      {cubierta({"seccion": k, "id": k})}
     </a>
     <div class="body">
       <h2><a href="{u}">{e(titular)}</a></h2>
-      {obra(dest, "obra")}
-      <p class="excerpt">{e(resumen)}</p>
+      <p class="excerpt">{e(S["resumen"])}</p>
       <a class="readlink mono" href="{u}">{e(leer)}</a>
     </div>
-    <div class="issue">{"<b>Muestra</b>" if dest.get("muestra") else ""}<span class="mono">{mes_anio(dest['fecha'])} · {detalle}</span></div>
+    <div class="issue"><span class="mono">{detalle}</span></div>
   </section>"""
     cuerpo = f"""<div class="wrap">
   <section class="hero">
