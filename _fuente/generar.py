@@ -331,7 +331,7 @@ def seccion(k):
   <header class="sec-head">
     <span class="roman">{S['num']}</span>
     <h1>{e(S['nombre'])}</h1>
-    <p class="mono">{e(S['desc'])} · {"1 texto" if reales == 1 else f"{reales} textos"}</p>
+    <p class="mono">{e(S['desc'])}{"" if not reales else (" · 1 texto" if reales == 1 else f" · {reales} textos")}</p>
   </header>
   <ol class="rows" reversed>{filas}</ol>
 </div>"""
