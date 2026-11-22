@@ -349,5 +349,4 @@ picture.cubierta img { display: block; width: 100%; aspect-ratio: 3 / 4; object-
 }
 /* Poemas cortos: centrados en la hoja, sin salirse de los renglones */
 .hoja.corta { padding-top: calc(var(--renglon) * (2 + var(--arriba, 0))); }
-.hoja.corta .hoja-texto { width: fit-content; max-width: 100%; margin: 0 auto; }
 @media (max-width: 620px) { .hoja { min-height: calc(var(--renglon) * 17); } }
