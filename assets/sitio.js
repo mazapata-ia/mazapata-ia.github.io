@@ -112,3 +112,37 @@ document.addEventListener("click", function (ev) {
   var listo = function () { b.textContent = "Copiada"; setTimeout(function () { b.textContent = orig; }, 1800); };
   if (navigator.clipboard) { navigator.clipboard.writeText(t).then(listo, function () {}); }
 });
+
+/* Pantalla de la portada: un texto al azar */
+(function () {
+  var datos = document.getElementById("pantalla-datos");
+  var caja = document.querySelector(".pantalla");
+  if (!datos || !caja) return;
+  var lista; try { lista = JSON.parse(datos.textContent); } catch (e) { return; }
+  if (!lista.length) return;
+  var texto = caja.querySelector(".pantalla-texto"), fuente = caja.querySelector(".pantalla-fuente"),
+      boton = caja.querySelector(".pantalla-otro"), actual = 0;
+  function pintar(i) {
+    var a = lista[i];
+    texto.innerHTML = "";
+    a.t.split(/\n[ \t]*\n/).forEach(function (q) {
+      if (!q) return;
+      var p = document.createElement("p"); p.textContent = q; texto.appendChild(p);
+    });
+    fuente.textContent = "De «" + a.titulo + "»";
+    fuente.href = a.url;
+    actual = i;
+  }
+  function otro() {
+    if (lista.length < 2) return actual;
+    var i; do { i = Math.floor(Math.random() * lista.length); } while (i === actual);
+    return i;
+  }
+  pintar(otro());
+  if (lista.length < 2) { boton.hidden = true; return; }
+  boton.addEventListener("click", function () {
+    var i = otro();
+    texto.classList.add("cambia");
+    setTimeout(function () { pintar(i); texto.classList.remove("cambia"); }, 350);
+  });
+})();

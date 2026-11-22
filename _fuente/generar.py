@@ -238,6 +238,31 @@ def entrada_indice(x):
 </a></li>"""
 
 
+
+def pantalla_html():
+    """Pantalla de la portada: muestra al azar uno de los textos publicados."""
+    pool = []
+    for x in sorted(ESCRITOS, key=lambda y: (y["fecha"], y.get("numero", 0))):
+        if x.get("muestra"):
+            continue
+        u = url_escrito(x)
+        if x.get("poemas"):
+            for t in x["poemas"]:
+                pool.append({"t": NUM_POEMA.sub("", t, count=1), "titulo": x["titulo"], "url": u})
+        else:
+            pool.append({"t": extracto(x), "titulo": x["titulo"], "url": u})
+    if not pool:
+        return ""
+    a = pool[0]
+    estrofas = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", a["t"]) if q)
+    datos = json.dumps(pool, ensure_ascii=False).replace("</", "<\\/")
+    return (f'<aside class="pantalla" aria-label="Un texto de Ofrenda al azar"><div class="pantalla-marco">'
+            f'<p class="pantalla-et mono">Al azar</p>'
+            f'<div class="pantalla-texto" aria-live="polite">{estrofas}</div>'
+            f'<div class="pantalla-pie"><a class="pantalla-fuente mono" href="{a["url"]}">De «{e(a["titulo"])}»</a>'
+            f'<button class="pantalla-otro mono" type="button">Otro texto</button></div>'
+            f'</div></aside><script type="application/json" id="pantalla-datos">{datos}</script>')
+
 def portada():
     pills = f'<a class="pill" href="#ultimos" aria-current="true">Todo</a>' + "".join(
         f'<a class="pill" href="{BASE}{k}/">{SECCIONES[k]["corto"]}</a>' for k in ORDEN)
@@ -279,7 +304,7 @@ def portada():
       <p class="lede">Un espacio para pensar, sentir y escribir sobre la experiencia humana junto a la novedad que emerge constantemente en la sociedad. La escritura como el resultado de una exploración intelectual.</p>
       <nav class="pills" aria-label="Ir a una sección">{pills}</nav>
     </div>
-    <picture class="hero-art"><source srcset="{BASE}assets/grabado-portada.webp" type="image/webp"><img src="{BASE}assets/grabado-portada.jpg" width="900" height="1200" alt="Grabado de una misma persona sentada, en tamaño grande y pequeño, con una cinta verde que cruza el cuerpo. Dibujo de Mariana Zapata."></picture>
+{pantalla_html()}
   </section>{dest_html}
 </div>"""
     ld = json.dumps({"@context": "https://schema.org", "@type": "WebSite", "name": SITIO["nombre"],
