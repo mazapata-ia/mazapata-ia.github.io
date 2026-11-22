@@ -24,7 +24,7 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
     "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "resumen": "Fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
-    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos", "titular": "Lo extenso", "resumen": "Ensayos y crónicas que piden más tiempo, más páginas y una lectura sin prisa."},
+    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Ensayos, crónicas y reflexiones sobre lo leído", "imagen": "grabado-largos", "titular": "Lo extenso", "resumen": "Ensayos, crónicas y reflexiones sobre libros y artículos leídos: textos que piden más tiempo y una lectura sin prisa, y que se detienen en lo que dejan las lecturas después de cerrarlas."},
 }
 ORDEN = ["breves", "largos"]
 GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "escritos"]
