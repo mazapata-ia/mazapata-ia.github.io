@@ -328,8 +328,13 @@ def cuaderno():
     hojas = ""
     for i, t in enumerate(POEMAS, 1):
         resto = NUM_POEMA.sub("", t, count=1)
-        estrofas = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", resto) if q)
-        hojas += (f'<article class="hoja" id="poema-{i}" data-n="{i}" aria-label="Página {i} de {n}">'
+        bloques = [q for q in re.split(r"\n[ \t]*\n", resto) if q]
+        estrofas = "".join(f"<p>{e(q)}</p>" for q in bloques)
+        # renglones que ocupa el poema (versos + espacios entre estrofas)
+        renglones = sum(len(q.split("\n")) for q in bloques) + len(bloques) - 1
+        corta = renglones <= 9
+        extra = f' corta" style="--arriba:{max(0, (13 - renglones) // 2)}' if corta else ""
+        hojas += (f'<article class="hoja{extra}" id="poema-{i}" data-n="{i}" aria-label="Página {i} de {n}">'
                   f'<div class="hoja-texto">{estrofas}</div><p class="folio mono">{i}</p></article>')
     cuerpo = f"""<div class="wrap">
   <header class="sec-head">
@@ -517,8 +522,9 @@ for k in ORDEN:
     escribir(f"{k}/index.html", seccion(k))
 for x in ESCRITOS:
     escribir(f"escritos/{x['id']}/index.html", escrito(x))
+_pagina_de = {int(t.split(".")[0]): i for i, t in enumerate(POEMAS, 1)}
 for viejo, num in CUADERNO.get("antiguas", {}).items():
-    escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/#poema-{num}", "Ir al cuaderno"))
+    escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/#poema-{_pagina_de.get(num, 1)}", "Ir al cuaderno"))
 escribir("quien-habita/index.html", quien_habita())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
