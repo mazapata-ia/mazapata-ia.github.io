@@ -31,7 +31,7 @@ SECCIONES = {
 # Géneros de cada sección: al entrar a una sección se elige el género antes de llegar a los textos.
 GENEROS = {
     "breves": [{"id": "poesia", "nombre": "Poesía", "cuaderno": True}],
-    "largos": [{"id": "ensayo", "nombre": "Ensayo"}, {"id": "cronica", "nombre": "Crónica"}],
+    "largos": [{"id": "ensayo", "nombre": "Ensayo"}, {"id": "cronica", "nombre": "Crónica"}, {"id": "literatura", "nombre": "Literatura"}],
     "lecturas": [{"id": "libros", "nombre": "Libros"}, {"id": "articulos", "nombre": "Artículos"}],
 }
 ORDEN = ["breves", "largos", "lecturas"]
