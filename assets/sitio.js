@@ -63,7 +63,7 @@
       ctx.moveTo(m + R() * j, m); ctx.lineTo(W - m, m + R() * j); ctx.lineTo(W - m - R() * j, H - m); ctx.lineTo(m, H - m - R() * j); ctx.closePath();
       ctx.stroke();
     }
-    if (!animar || reduce) { lineas.forEach(trazar); marco(); return; }
+    if (!animar || reduce || document.documentElement.hasAttribute("data-lec-anim")) { lineas.forEach(trazar); marco(); return; }
     var idx = 0, porCuadro = Math.max(4, Math.ceil(lineas.length / 30));
     (function sig() {
       for (var c = 0; c < porCuadro && idx < lineas.length; c++) trazar(lineas[idx++]);
@@ -179,7 +179,8 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
     if (!sinHash) { try { history.replaceState(null, "", "#poema-" + (i + 1)); } catch (e) {} }
     if (desplazar) {
       var top = c.getBoundingClientRect().top + window.pageYOffset - 90;
-      if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: "smooth" });
+      var quieto = document.documentElement.hasAttribute("data-lec-anim") || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: quieto ? "auto" : "smooth" });
     }
   }
   c.classList.add("activo");

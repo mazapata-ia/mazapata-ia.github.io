@@ -198,6 +198,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{{var lec=JSON.parse(localStorage.getItem("ofrenda-lectura")||"null");if(lec&&lec.ap){{var h=document.documentElement,k;for(k in lec.ap.a)h.setAttribute("data-lec-"+k,lec.ap.a[k]);for(k in lec.ap.v)h.style.setProperty(k,lec.ap.v[k]);}}}}catch(e){{}}</script>
 <title>{e(titulo_full)}</title>
 <meta name="description" content="{e(desc)}">
 <meta name="author" content="{e(SITIO['autora'])}">
@@ -264,6 +265,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   </div>
 </footer>
 <script src="{BASE}assets/sitio.js?v={VERSION}" defer></script>
+<script src="{BASE}assets/lectura.js?v={VERSION}" defer></script>
 </body>
 </html>
 """
