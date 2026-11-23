@@ -24,9 +24,11 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
          "septiembre", "octubre", "noviembre", "diciembre"]
 SECCIONES = {
     "breves": {"num": "I", "nombre": "Textos breves", "corto": "Breves", "titular": "Lo breve", "resumen": "Fragmentos, apuntes y piezas cortas que nacen de una lectura, una conversación o una imagen.", "desc": "Escritura de texto corto", "imagen": "grabado-breves"},
-    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Ensayos, crónicas y reflexiones sobre lo leído", "imagen": "grabado-largos", "titular": "Lo extenso", "resumen": "Ensayos, crónicas y reflexiones sobre libros y artículos leídos: textos que piden más tiempo y una lectura sin prisa, y que se detienen en lo que dejan las lecturas después de cerrarlas."},
+    "largos": {"num": "II", "nombre": "Textos largos", "corto": "Largos", "desc": "Escritura de texto largo", "imagen": "grabado-largos", "titular": "Lo extenso", "resumen": "Ensayos y crónicas que piden más tiempo, más páginas y una lectura sin prisa."},
+    "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
+                 "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas", "titular": "Lo que se lee", "resumen": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos."},
 }
-ORDEN = ["breves", "largos"]
+ORDEN = ["breves", "largos", "lecturas"]
 GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "escritos"]
 
 e = lambda s: html.escape(str(s), quote=True)
@@ -181,7 +183,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
       <picture class="brand-logo"><source srcset="{BASE}assets/logo-mini.webp" type="image/webp"><img src="{BASE}assets/logo-mini.png" width="34" height="45" alt=""></picture>
       <span>{e(SITIO['nombre'])}</span>
     </a>
-    <a class="bar-center mono" href="{BASE}">Lo breve · Lo extenso</a>
+    <a class="bar-center mono" href="{BASE}">Escritos · Lecturas</a>
     <button class="menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu" type="button">
       <i></i><i></i><span class="mono">Menú</span>
     </button>
@@ -198,8 +200,9 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
       <li><a href="{BASE}"><span class="mono">—</span><span>Portada</span></a></li>
       <li><a href="{BASE}breves/"><span class="mono">I</span><span>Textos breves</span></a></li>
       <li><a href="{BASE}largos/"><span class="mono">II</span><span>Textos largos</span></a></li>
-      <li><a href="{BASE}quien-habita/"><span class="mono">III</span><span>Quién habita</span></a></li>
-      <li><a href="{BASE}apoyar/"><span class="mono">IV</span><span>Apoyar</span></a></li>
+      <li><a href="{BASE}lecturas/"><span class="mono">III</span><span>Lecturas que me atraviesan</span></a></li>
+      <li><a href="{BASE}quien-habita/"><span class="mono">IV</span><span>Quién habita</span></a></li>
+      <li><a href="{BASE}apoyar/"><span class="mono">V</span><span>Apoyar</span></a></li>
     </ol>
   </div>
 </nav>
@@ -212,7 +215,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   <div class="wrap">
     <span class="mono">{e(SITIO['nombre'])} · {e(SITIO['autora'])}</span>
     <nav class="mono" aria-label="Pie">
-      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a>
+      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a>
     </nav>
   </div>
 </footer>
@@ -409,7 +412,7 @@ def escrito(x):
     tag = MUESTRA_TAG if x.get("muestra") else ""
     cita = f'<blockquote class="pull">{e(x["cita"])}</blockquote>' if x.get("cita") else ""
     drop = " drop" if x["seccion"] == "largos" else ""
-    con_dibujo = x["seccion"] == "largos"
+    con_dibujo = x["seccion"] in ("largos", "lecturas")
     fig = lambda cls: (f'<figure class="{cls}"><picture><source srcset="{BASE}assets/dibujo-hilo.webp" type="image/webp">'
                        f'<img src="{BASE}assets/dibujo-hilo.png" width="600" height="1217" loading="lazy" '
                        f'alt="Dibujo en línea verde de una persona que sostiene un hilo; arriba, el hilo se enreda. Dibujo de {e(SITIO["autora"])}."></picture></figure>')
@@ -449,7 +452,7 @@ def quien_habita():
     usuario, dominio = "mazapatatrabajo", "gmail.com"
     cuerpo = f"""<div class="wrap"><section class="page habita">
   <div>
-    <p class="mono">III — Quién habita</p>
+    <p class="mono">IV — Quién habita</p>
     <h1>Quién habita</h1>
     <p class="nombre">{e(SITIO['autora'])}</p>
     <p class="big">Pronto, unas palabras sobre quien escribe estas páginas: de dónde viene su escritura, qué la mueve y desde dónde mira el mundo.</p>
@@ -501,7 +504,7 @@ def apoyar():
                        f'<a class="mono" href="{e(o["url"])}" target="_blank" rel="noopener">Aportar</a></li>')
     cuerpo = f"""<div class="wrap"><section class="page">
   <div>
-    <p class="mono">IV — Apoyar</p>
+    <p class="mono">V — Apoyar</p>
     <h1>Sostener Ofrenda</h1>
     <p class="big">{e(A.get("texto", ""))}</p>
     <ul class="ways">{formas}</ul>
@@ -539,12 +542,11 @@ for viejo, num in CUADERNO.get("antiguas", {}).items():
     escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/#poema-{_pagina_de.get(num, 1)}", "Ir al cuaderno"))
 escribir("quien-habita/index.html", quien_habita())
 escribir("acerca/index.html", redireccion("quien-habita/"))
-escribir("lecturas/index.html", redireccion("", "Ir a la portada"))
 escribir("apoyar/index.html", apoyar())
 escribir("404.html", no_encontrado())
 
 hoy = datetime.date.today().isoformat()
-urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("quien-habita/", None), ("apoyar/", None)]
+urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("lecturas/", hoy), ("quien-habita/", None), ("apoyar/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
