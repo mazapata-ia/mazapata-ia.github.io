@@ -309,7 +309,7 @@ def portada():
   <section class="hero">
     <div>
       <h1 class="masthead"><span>{e(SITIO['nombre'])}</span></h1>
-      <p class="lede">Un espacio para pensar, sentir y escribir sobre la experiencia humana junto a la novedad que emerge constantemente en la sociedad. La escritura como el resultado de una exploración intelectual.</p>
+      <p class="lede">Un espacio para pensar, sentir y escribir. La escritura como el resultado de una exploración intelectual.</p>
       <nav class="pills" aria-label="Ir a una sección">{pills}</nav>
     </div>
 {pantalla_html()}
