@@ -28,6 +28,12 @@ SECCIONES = {
     "lecturas": {"num": "III", "nombre": "Lecturas que me atraviesan", "corto": "Lecturas",
                  "desc": "Reflexiones sobre libros y artículos leídos", "imagen": "grabado-lecturas", "titular": "Lo que se lee", "resumen": "Reflexiones sobre libros y artículos leídos, y sobre lo que dejan después de cerrarlos."},
 }
+# Géneros de cada sección: al entrar a una sección se elige el género antes de llegar a los textos.
+GENEROS = {
+    "breves": [{"id": "poesia", "nombre": "Poesía", "cuaderno": True}],
+    "largos": [{"id": "ensayo", "nombre": "Ensayo"}, {"id": "cronica", "nombre": "Crónica"}],
+    "lecturas": [{"id": "libros", "nombre": "Libros"}, {"id": "articulos", "nombre": "Artículos"}],
+}
 ORDEN = ["breves", "largos", "lecturas"]
 GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "escritos"]
 
@@ -82,6 +88,11 @@ def descripcion(x):
 
 def etiqueta(x):
     return "Muestra" if x.get("muestra") else f"Nº {x['numero']:02d}"
+
+
+def genero_de(x):
+    g = x.get("genero") or GENEROS[x["seccion"]][0]["id"]
+    return next(G for G in GENEROS[x["seccion"]] if G["id"] == g)
 
 
 def url_escrito(x):
@@ -246,7 +257,7 @@ def pantalla_html():
     pool = []
     for i, t in enumerate(POEMAS, 1):
         pool.append({"t": NUM_POEMA.sub("", t, count=1), "fuente": f"Cuaderno · {i} / {len(POEMAS)}",
-                     "url": f"{BASE}breves/#poema-{i}"})
+                     "url": f"{BASE}breves/poesia/#poema-{i}"})
     for x in sorted(ESCRITOS, key=lambda y: (y["fecha"], y.get("numero", 0))):
         if x.get("muestra"):
             continue
@@ -280,7 +291,7 @@ def portada():
         if k == "breves" and POEMAS:
             tab = "Nuevo"
             detalle = f"{mes_anio(CUADERNO['fecha'])} · {len(POEMAS)} textos"
-            leer = "Abrir el cuaderno"
+            leer = "Entrar"
         elif reales:
             dest = max(reales, key=lambda x: (fecha(x["fecha"]), x.get("numero", 0)))
             tab = "Nuevo"
@@ -337,10 +348,11 @@ def cuaderno():
         hojas += (f'<article class="hoja{extra}" id="poema-{i}" data-n="{i}" aria-label="Página {i} de {n}">'
                   f'<div class="hoja-texto">{estrofas}</div><p class="folio mono">{i}</p></article>')
     cuerpo = f"""<div class="wrap">
+  <a class="back mono" href="{BASE}breves/">← {e(S['nombre'])}</a>
   <header class="sec-head">
     <span class="roman">{S['num']}</span>
-    <h1>{e(S['nombre'])}</h1>
-    <p class="mono">{e(S['desc'])} · {n} textos</p>
+    <h1>Poesía</h1>
+    <p class="mono">{e(S['nombre'])} · Cuaderno · {n} textos</p>
   </header>
   <section class="cuaderno" aria-label="Cuaderno de textos breves">
     <nav class="pasar" aria-label="Pasar página">
@@ -352,14 +364,50 @@ def cuaderno():
     <p class="pista mono">Desliza o usa las flechas para pasar la página</p>
   </section>
 </div>"""
-    return pagina("breves/", S["nombre"], f"Cuaderno de textos breves de {SITIO['autora']}.", cuerpo)
+    return pagina("breves/poesia/", "Poesía", f"Cuaderno de poesía de {SITIO['autora']}.", cuerpo)
+
+
+def cantidad(n):
+    return "1 texto" if n == 1 else f"{n} textos"
 
 
 def seccion(k):
-    if k == "breves" and POEMAS:
+    """Página de la sección: primero se elige el género."""
+    S = SECCIONES[k]
+    filas = ""
+    for G in GENEROS[k]:
+        if G.get("cuaderno"):
+            n, detalle = len(POEMAS), "Cuaderno · se pasa la página"
+        else:
+            n = len([x for x in por_seccion(k) if genero_de(x) is G and not x.get("muestra")])
+            detalle = ""
+        estado = cantidad(n) if n else "En preparación"
+        sub = f'<p class="q">{e(detalle)}</p>' if detalle else ""
+        filas += f"""<li class="row genero"><a href="{BASE}{k}/{G['id']}/">
+      <div><h2>{e(G['nombre'])}</h2>{sub}</div>
+      <span class="d mono">{estado}</span>
+    </a></li>"""
+    salto = ""
+    if k == "breves":
+        # enlaces antiguos a /breves/#poema-N siguen abriendo el cuaderno
+        salto = (f'<script>if(/^#poema-\\d+$/.test(location.hash))'
+                 f'location.replace("{BASE}breves/poesia/"+location.hash);</script>')
+    cuerpo = f"""<div class="wrap">{salto}
+  <header class="sec-head">
+    <span class="roman">{S['num']}</span>
+    <h1>{e(S['nombre'])}</h1>
+    <p class="mono">{e(S['desc'])} · Elige un género</p>
+  </header>
+  <ol class="rows generos">{filas}</ol>
+</div>"""
+    return pagina(f"{k}/", S["nombre"], f"{S['nombre']} de {SITIO['autora']}: {S['desc'].lower()}.", cuerpo)
+
+
+def genero(k, G):
+    if G.get("cuaderno"):
         return cuaderno()
     S = SECCIONES[k]
-    lista = list(reversed(por_seccion(k)))
+    lista = [x for x in reversed(por_seccion(k)) if genero_de(x) is G]
     reales = len([x for x in lista if not x.get("muestra")])
     filas = ""
     for x in lista:
@@ -369,16 +417,18 @@ def seccion(k):
       <span class="d mono">{fecha_larga(x['fecha'])}</span>
     </a></li>"""
     if not filas:
-        filas = '<li><p class="empty">El primer texto de esta sección está en preparación.</p></li>'
+        filas = '<li><p class="empty">El primer texto de este género está en preparación.</p></li>'
     cuerpo = f"""<div class="wrap">
+  <a class="back mono" href="{BASE}{k}/">← {e(S['nombre'])}</a>
   <header class="sec-head">
     <span class="roman">{S['num']}</span>
-    <h1>{e(S['nombre'])}</h1>
-    <p class="mono">{e(S['desc'])}{"" if not reales else (" · 1 texto" if reales == 1 else f" · {reales} textos")}</p>
+    <h1>{e(G['nombre'])}</h1>
+    <p class="mono">{e(S['nombre'])}{"" if not reales else " · " + cantidad(reales)}</p>
   </header>
   <ol class="rows" reversed>{filas}</ol>
 </div>"""
-    return pagina(f"{k}/", S["nombre"], f"{S['nombre']} de {SITIO['autora']}: {S['desc'].lower()}.", cuerpo)
+    return pagina(f"{k}/{G['id']}/", f"{G['nombre']} · {S['nombre']}",
+                  f"{G['nombre']} en {S['nombre'].lower()} de {SITIO['autora']}.", cuerpo)
 
 
 def cuerpo_html(x):
@@ -398,7 +448,7 @@ def cuerpo_html(x):
 
 def escrito(x):
     S = SECCIONES[x["seccion"]]
-    lista = por_seccion(x["seccion"])
+    lista = [y for y in por_seccion(x["seccion"]) if genero_de(y) is genero_de(x)]
     i = lista.index(x)
 
     def enlace(y, rot):
@@ -419,7 +469,7 @@ def escrito(x):
     lado = fig("dibujo-lado") if con_dibujo else ""
     final = fig("dibujo-final") if con_dibujo else ""
     cuerpo = f"""<div class="wrap">
-  <a class="back mono" href="{BASE}{x['seccion']}/">← {e(S['nombre'])}</a>
+  <a class="back mono" href="{BASE}{x['seccion']}/{genero_de(x)['id']}/">← {e(genero_de(x)['nombre'])} · {e(S['nombre'])}</a>
   <article class="article">
     <div class="lado"><dl class="meta">{meta}</dl>{lado}</div>
     <div>
@@ -535,18 +585,23 @@ for d in GENERADAS:
 escribir("index.html", portada())
 for k in ORDEN:
     escribir(f"{k}/index.html", seccion(k))
+    for G in GENEROS[k]:
+        escribir(f"{k}/{G['id']}/index.html", genero(k, G))
 for x in ESCRITOS:
     escribir(f"escritos/{x['id']}/index.html", escrito(x))
 _pagina_de = {int(t.split(".")[0]): i for i, t in enumerate(POEMAS, 1)}
 for viejo, num in CUADERNO.get("antiguas", {}).items():
-    escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/#poema-{_pagina_de.get(num, 1)}", "Ir al cuaderno"))
+    escribir(f"escritos/{viejo}/index.html", redireccion(f"breves/poesia/#poema-{_pagina_de.get(num, 1)}", "Ir al cuaderno"))
 escribir("quien-habita/index.html", quien_habita())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
 escribir("404.html", no_encontrado())
 
 hoy = datetime.date.today().isoformat()
-urls = [("", hoy), ("breves/", hoy), ("largos/", hoy), ("lecturas/", hoy), ("quien-habita/", None), ("apoyar/", None)]
+urls = [("", hoy)]
+for k in ORDEN:
+    urls += [(f"{k}/", hoy)] + [(f"{k}/{G['id']}/", hoy) for G in GENEROS[k]]
+urls += [("quien-habita/", None), ("apoyar/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
