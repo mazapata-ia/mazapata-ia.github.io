@@ -154,7 +154,8 @@ def por_seccion(sec):
 # ---------- plantilla ----------
 def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head="", banda=True):
     canon = URL + "/" + ruta
-    titulo_full = titulo if titulo == SITIO["nombre"] else f"{titulo} · {SITIO['nombre']}"
+    titulo_full = (f"{SITIO['nombre']} · {SITIO['autora']}" if titulo == SITIO["nombre"]
+                   else f"{titulo} · {SITIO['nombre']}")
     verif = (f'<meta name="google-site-verification" content="{e(SITIO["google_verificacion"])}">'
              if SITIO.get("google_verificacion") else "")
     robots = "" if indexar else '<meta name="robots" content="noindex">'
@@ -181,7 +182,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
 {robots}{verif}
 <link rel="canonical" href="{e(canon)}">
 <meta property="og:site_name" content="{e(SITIO['nombre'])}">
-<meta property="og:title" content="{e(titulo)}">
+<meta property="og:title" content="{e(titulo_full)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:type" content="{tipo}">
 <meta property="og:url" content="{e(canon)}">
