@@ -134,6 +134,28 @@ PROPIO = next((C for C in CUADERNOS if C["autor"] == SITIO["autora"]), CUADERNOS
 POEMAS = [t for C in CUADERNOS for t in C["poemas"]]
 
 
+LIBROS = DATOS.get("libros", [])
+
+
+def url_libro(L):
+    return f"{BASE}{L['seccion']}/{L['genero']}/{L['id']}/"
+
+
+def tapa_libro(L, cls="libro-tapa"):
+    if L.get("portada"):
+        return f'<img class="{cls} con-imagen" src="{BASE}{e(L["portada"])}" alt="Portada de {e(L["titulo"])}">'
+    return (f'<div class="{cls}" aria-hidden="true"><span class="lt-titulo">{e(L["titulo"])}</span>'
+            f'<span class="lt-autor mono">{e(L["autor"])}</span></div>')
+
+
+def boton_compra(L, cls="btn-compra mono"):
+    C = L.get("compra") or {}
+    texto = f"Comprar en {e(C.get('tienda', 'la tienda'))}"
+    if C.get("url"):
+        return f'<a class="{cls}" href="{e(C["url"])}" target="_blank" rel="noopener">{texto} ↗</a>'
+    return f'<span class="{cls} inactivo" aria-disabled="true" title="En la muestra este botón no lleva a ninguna tienda">{texto}</span>'
+
+
 def url_cuaderno(C):
     return f"{BASE}breves/poesia/{C['id']}/"
 
@@ -390,6 +412,53 @@ def cuaderno(C):
                   f"Cuaderno de poesía de {C['autor']} en Ofrenda.", cuerpo, indexar=not C.get("muestra"))
 
 
+def libro(L):
+    S = SECCIONES[L["seccion"]]
+    G = next(G for G in GENEROS[L["seccion"]] if G["id"] == L["genero"])
+    tag = MUESTRA_TAG if L.get("muestra") else ""
+    paginas = L["paginas"]
+    n = len(paginas) + 1
+    hojas = ""
+    for i, t in enumerate(paginas, 1):
+        parr = "".join(f"<p>{e(q)}</p>" for q in re.split(r"\n[ \t]*\n", t) if q)
+        hojas += (f'<article class="hoja" id="poema-{i}" data-n="{i}" aria-label="Página {i} de la muestra">'
+                  f'<div class="hoja-texto">{parr}</div><p class="folio mono"><span>{e(L["titulo"])}</span> · {i}</p></article>')
+    precio = f'<p class="seguir-precio">{e(L["precio"])}</p>' if L.get("precio") else ""
+    nota = '<p class="seguir-nota mono">Muestra: este botón no lleva a ninguna tienda.</p>' if L.get("muestra") else ""
+    hojas += (f'<article class="hoja seguir" id="poema-{n}" data-n="{n}" aria-label="Para seguir leyendo">'
+              f'<div class="hoja-texto"><p class="sobre-et mono">Fin de la muestra</p><p class="seguir-titulo">Para seguir leyendo</p>'
+              f'<p><em>{e(L["titulo"])}</em>, de {e(L["autor"])}, está completo en {e((L.get("compra") or {}).get("tienda", "la tienda"))}.</p>'
+              f'{precio}{boton_compra(L)}{nota}</div></article>')
+    cuerpo = f"""<div class="wrap">
+  <a class="back mono" href="{BASE}{L['seccion']}/{G['id']}/">← {e(G['nombre'])} · {e(S['nombre'])}</a>
+  <section class="libro-ficha">
+    {tapa_libro(L)}
+    <div>
+      <p class="mono libro-gen">{e(S['nombre'])} · {e(G['nombre'])} · Libro</p>
+      <h1>{e(L['titulo'])}{tag}</h1>
+      <p class="libro-autor">{e(L['autor'])}</p>
+      <p class="libro-desc">{e(L.get('descripcion', ''))}</p>
+      <div class="libro-acciones"><a class="btn-leer mono" href="#muestra">Leer la muestra</a>{boton_compra(L)}</div>
+      {f'<p class="libro-precio mono">{e(L["precio"])}</p>' if L.get("precio") else ""}
+    </div>
+  </section>
+  <section class="cuaderno libro" id="muestra" aria-label="Páginas de muestra de {e(L['titulo'])}">
+    <nav class="pasar" aria-label="Pasar página">
+      <button class="ant mono" type="button" aria-label="Página anterior">← Anterior</button>
+      <span class="cuenta mono" aria-live="polite">1 / {n}</span>
+      <button class="sig mono" type="button" aria-label="Página siguiente">Siguiente →</button>
+    </nav>
+    <div class="hojas">{hojas}</div>
+    <p class="pista mono">Desliza o usa las flechas para pasar la página</p>
+  </section>
+</div>"""
+    ld = {"@context": "https://schema.org", "@type": "Book", "name": L["titulo"], "inLanguage": "es",
+          "author": {"@type": "Person", "name": L["autor"]}, "description": L.get("descripcion", "")}
+    return pagina(url_libro(L)[len(BASE):], f"{L['titulo']}, de {L['autor']}", L.get("descripcion", ""), cuerpo,
+                  indexar=not L.get("muestra"), tipo="book",
+                  extra_head=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+
+
 def estanteria():
     """Poesía: los cuadernos, uno por autor."""
     S = SECCIONES["breves"]
@@ -428,7 +497,8 @@ def seccion(k):
         if G.get("cuaderno"):
             n, detalle = len(POEMAS), "Cuadernos de quienes escriben"
         else:
-            n = len([x for x in por_seccion(k) if genero_de(x) is G and not x.get("muestra")])
+            n = (len([x for x in por_seccion(k) if genero_de(x) is G and not x.get("muestra")])
+                 + len([L for L in LIBROS if L["seccion"] == k and L["genero"] == G["id"]]))
             detalle = ""
         estado = (("1 cuaderno" if len(CUADERNOS) == 1 else f"{len(CUADERNOS)} cuadernos") if G.get("cuaderno")
                   else cantidad(n)) if n else "En preparación"
@@ -458,8 +528,16 @@ def genero(k, G):
         return estanteria()
     S = SECCIONES[k]
     lista = [x for x in reversed(por_seccion(k)) if genero_de(x) is G]
-    reales = len([x for x in lista if not x.get("muestra")])
+    libros = [L for L in LIBROS if L["seccion"] == k and L["genero"] == G["id"]]
+    reales = len([x for x in lista if not x.get("muestra")]) + len([L for L in libros if not L.get("muestra")])
     filas = ""
+    for L in libros:
+        tag = MUESTRA_TAG if L.get("muestra") else ""
+        filas += f"""<li class="row libro-fila"><a href="{url_libro(L)}">
+      <div class="lf">{tapa_libro(L, "libro-tapa mini")}<div><h2>{e(L['titulo'])}{tag}</h2><p class="lf-autor">{e(L['autor'])}</p>
+      <p class="q">{e(L.get('descripcion', ''))}</p></div></div>
+      <span class="d mono">Libro · {len(L['paginas'])} páginas de muestra</span>
+    </a></li>"""
     for x in lista:
         ob = obra(x, "q").replace('class="q"', 'class="q" style="font-style:normal;color:var(--ink)"')
         filas += f"""<li class="row"><a href="{url_escrito(x)}">
@@ -645,6 +723,8 @@ for C in CUADERNOS:
     for viejo, num in C.get("antiguas", {}).items():
         escribir(f"escritos/{viejo}/index.html",
                  redireccion(f"breves/poesia/{C['id']}/#poema-{_pagina_de.get(num, 1)}", "Ir al cuaderno"))
+for L in LIBROS:
+    escribir(url_libro(L)[len(BASE):] + "index.html", libro(L))
 escribir("quien-habita/index.html", quien_habita())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
@@ -655,6 +735,7 @@ urls = [("", hoy)]
 for k in ORDEN:
     urls += [(f"{k}/", hoy)] + [(f"{k}/{G['id']}/", hoy) for G in GENEROS[k]]
 urls += [(f"breves/poesia/{C['id']}/", C["fecha"]) for C in CUADERNOS if not C.get("muestra")]
+urls += [(url_libro(L)[len(BASE):], L["fecha"]) for L in LIBROS if not L.get("muestra")]
 urls += [("quien-habita/", None), ("apoyar/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)

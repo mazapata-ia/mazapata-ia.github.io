@@ -420,3 +420,46 @@ picture.logo-banda, picture.logo-banda img { display: block; width: 90px; height
   .tapa-autor { font-size: 21px; }
   .tapa-pie { font-size: 9px; letter-spacing: .1em; }
 }
+
+/* Libros (Literatura): ficha, tapa y páginas de muestra */
+.libro-tapa { display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 2 / 3; width: 100%; padding: 26px 20px 22px;
+  background: var(--accent); color: #F2EEE8; box-shadow: inset 6px 0 0 rgba(0, 0, 0, .18), 0 18px 30px -18px rgba(27, 26, 24, .55); }
+.libro-tapa.con-imagen { padding: 0; object-fit: cover; }
+.lt-titulo { font-family: var(--display); font-style: italic; font-size: 28px; line-height: 1.08; }
+.lt-autor { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; opacity: .85; }
+.libro-tapa.mini { width: 72px; padding: 9px 7px; flex: none; }
+.libro-tapa.mini .lt-titulo { font-size: 11px; }
+.libro-tapa.mini .lt-autor { font-size: 6px; letter-spacing: .1em; }
+.lf { display: flex; gap: 22px; align-items: flex-start; }
+.lf-autor { margin: 4px 0 0; font-style: italic; color: var(--accent); }
+.libro-ficha { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: clamp(24px, 5vw, 60px); align-items: start; padding: 24px 0 48px; border-bottom: 1px solid var(--ink); margin-bottom: 40px; }
+.libro-gen { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 14px; }
+.libro-ficha h1 { font-family: var(--display); font-size: clamp(30px, 4vw, 52px); line-height: 1; letter-spacing: -.02em; font-weight: 450; }
+.libro-ficha h1 .tag-muestra { vertical-align: middle; }
+.libro-autor { font-family: var(--display); font-style: italic; font-size: 24px; color: var(--accent); margin: 10px 0 0; }
+.libro-desc { font-size: 18px; line-height: 1.55; max-width: 52ch; margin: 22px 0 26px; }
+.libro-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn-leer, .btn-compra { display: inline-block; text-decoration: none; border-radius: 999px; padding: 12px 22px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+.btn-leer { border: 1px solid var(--ink); color: var(--ink); }
+.btn-leer:hover { background: var(--ink); color: var(--paper); }
+.btn-compra { background: var(--accent); color: #F2EEE8; border: 1px solid var(--accent); }
+.btn-compra:hover { background: var(--ink); border-color: var(--ink); }
+.btn-compra.inactivo { opacity: .55; cursor: not-allowed; }
+.btn-compra.inactivo:hover { background: var(--accent); border-color: var(--accent); }
+.libro-precio { margin: 16px 0 0; font-size: 12px; letter-spacing: .16em; color: var(--ink-soft); }
+.cuaderno.libro .hoja { background-image: none; background-color: #FDFBF7; padding: 64px 64px 72px; }
+.cuaderno.libro .hoja-texto { font-size: 19px; line-height: 1.75; }
+.cuaderno.libro .hoja-texto p { margin: 0; text-indent: 1.6em; text-align: justify; hyphens: auto; }
+.cuaderno.libro .hoja-texto p:first-child { text-indent: 0; }
+.cuaderno.libro .hoja.seguir .hoja-texto p { text-indent: 0; text-align: left; margin-bottom: 18px; }
+.seguir-titulo { font-family: var(--display); font-style: italic; font-size: 30px; color: var(--accent); }
+.seguir-precio { font-family: var(--mono); font-size: 13px; letter-spacing: .14em; }
+.seguir-nota { font-size: 10px; letter-spacing: .14em; color: var(--ink-soft); margin-top: 14px !important; }
+@media (max-width: 620px) {
+  .libro-ficha { grid-template-columns: 1fr; }
+  .libro-ficha .libro-tapa { width: 160px; }
+  .cuaderno.libro .hoja { padding: 40px 26px 60px; }
+  .cuaderno.libro .hoja-texto { font-size: 17px; }
+  .lf { gap: 14px; }
+  .libro-tapa.mini { width: 56px; }
+}

@@ -166,7 +166,7 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
     var m = /^#poema-(\d+)$/.exec(location.hash);
     return m ? Math.min(Math.max(parseInt(m[1], 10) - 1, 0), hojas.length - 1) : 0;
   }
-  function ir(n, atras, desplazar) {
+  function ir(n, atras, desplazar, sinHash) {
     if (n < 0 || n >= hojas.length) return;
     hojas[i].classList.remove("actual");
     i = n;
@@ -176,16 +176,17 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
     cuenta.textContent = (i + 1) + " / " + hojas.length;
     ant.disabled = i === 0;
     sig.disabled = i === hojas.length - 1;
-    try { history.replaceState(null, "", "#poema-" + (i + 1)); } catch (e) {}
+    if (!sinHash) { try { history.replaceState(null, "", "#poema-" + (i + 1)); } catch (e) {} }
     if (desplazar) {
       var top = c.getBoundingClientRect().top + window.pageYOffset - 90;
       if (window.pageYOffset > top) window.scrollTo({ top: top, behavior: "smooth" });
     }
   }
   c.classList.add("activo");
+  var conHash = /^#poema-\d+$/.test(location.hash);
   i = desdeHash();
-  ir(i, false, false);
-  if (location.hash) setTimeout(function () { c.scrollIntoView({ block: "start" }); }, 0);
+  ir(i, false, false, !conHash);
+  if (conHash) setTimeout(function () { c.scrollIntoView({ block: "start" }); }, 0);
   ant.addEventListener("click", function () { ir(i - 1, true, true); });
   sig.addEventListener("click", function () { ir(i + 1, false, true); });
   document.addEventListener("keydown", function (ev) {

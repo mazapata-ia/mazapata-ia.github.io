@@ -73,5 +73,27 @@
         "Hay días\nen que el silencio\npesa menos que una carta\n\ny otros\nen que no cabe\nen ningún sobre."
       ]
     }
+  ],
+  "libros": [
+    {
+      "id": "los-relojes-quietos",
+      "seccion": "largos",
+      "genero": "literatura",
+      "muestra": true,
+      "titulo": "Los relojes quietos",
+      "autor": "Inés Cárdenas",
+      "fecha": "2026-11-23",
+      "descripcion": "Libro y autora inventados para mostrar cómo se verá un libro en Ofrenda: unas páginas de muestra para leer aquí y, al final, el enlace para comprarlo completo.",
+      "precio": "USD 4,99",
+      "compra": {
+        "tienda": "Amazon",
+        "url": ""
+      },
+      "paginas": [
+        "En la casa de mi abuelo había once relojes y ninguno daba la hora. Él decía que no estaban dañados, que estaban descansando, y que un reloj que descansa también dice algo.\n\nYo tenía nueve años y le creí. Pasaba las tardes de vacaciones caminando de uno en uno, con la oreja pegada al vidrio, esperando oír lo que decían cuando nadie los obligaba a avanzar.",
+        "El de la sala marcaba las cuatro y diez. El del pasillo, las once menos cuarto. El de la cocina, que era de pared y tenía un gallo pintado, se había quedado en las seis en punto, y mi abuela, cuando vivía, decía que era la hora exacta en que el café sabía mejor.\n\nNadie en la familia se atrevía a darles cuerda. No era una prohibición; era algo más parecido al respeto que se le tiene a una persona dormida.",
+        "El verano en que mi abuelo enfermó, mi madre llegó con un reloj nuevo, de pilas, y lo colgó junto a la puerta.\n\n—Para que sepamos a qué hora tomarte la medicina —le dijo.\n\nÉl lo miró un rato largo, como se mira a un forastero que entra sin tocar. Esa noche, cuando todos dormían, lo oí levantarse. A la mañana siguiente, el reloj nuevo marcaba las cuatro y diez."
+      ]
+    }
   ]
 }
