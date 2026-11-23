@@ -398,3 +398,25 @@ picture.logo-banda, picture.logo-banda img { display: block; width: 90px; height
 /* Géneros de cada sección */
 .row.genero h2 { font-size: clamp(28px, 3.4vw, 42px); }
 .row.genero a:hover h2 { font-style: italic; }
+
+/* Poesía: un cuaderno por autor */
+.estante-nota { font-family: var(--display); font-style: italic; font-size: clamp(18px, 2vw, 21px); line-height: 1.45; color: var(--ink-soft); max-width: 46ch; margin: 28px 0 32px; }
+.estante { list-style: none; margin: 0 0 80px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: clamp(20px, 3vw, 36px); }
+.tapa { position: relative; display: flex; flex-direction: column; aspect-ratio: 3 / 4; padding: 26px 22px 20px 40px; text-decoration: none; color: var(--ink);
+  background: #FBF8F3 linear-gradient(to right, transparent 24px, rgba(78, 107, 103, .55) 24px, rgba(78, 107, 103, .55) 25px, transparent 25px);
+  border: 1px solid var(--rule); box-shadow: 0 1px 0 var(--rule), 0 14px 26px -18px rgba(27, 26, 24, .45); transition: transform .25s ease, box-shadow .25s ease; }
+.tapa:hover { transform: translateY(-4px) rotate(-.4deg); box-shadow: 0 1px 0 var(--rule), 0 20px 30px -18px rgba(27, 26, 24, .5); }
+.tapa-et { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.tapa-autor { font-family: var(--display); font-size: clamp(26px, 2.6vw, 32px); line-height: 1.05; margin-top: 10px; }
+.tapa .tag-muestra { align-self: flex-start; margin: 12px 0 0; }
+.tapa-pie { margin-top: auto; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.folio span { margin-right: .2em; }
+.hoja.sobre .sobre-et { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); margin: 0; }
+.hoja.sobre .sobre-nombre { font-style: italic; font-size: 26px; color: var(--accent); margin: 0 0 var(--renglon); }
+.sec-head h1 .tag-muestra { vertical-align: middle; }
+@media (max-width: 620px) {
+  .estante { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .tapa { padding: 18px 12px 14px 30px; background-image: linear-gradient(to right, transparent 18px, rgba(78, 107, 103, .55) 18px, rgba(78, 107, 103, .55) 19px, transparent 19px); }
+  .tapa-autor { font-size: 21px; }
+  .tapa-pie { font-size: 9px; letter-spacing: .1em; }
+}
