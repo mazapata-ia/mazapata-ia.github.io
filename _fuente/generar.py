@@ -788,7 +788,6 @@ def norma(clave, texto):
 
 def legal(ruta, titulo, desc, intro, secciones):
     """secciones: lista de (id, título, html)."""
-    otras = "".join(f'<li><a href="{BASE}{r}"{" aria-current=\"page\"" if r == ruta else ""}>{e(t)}</a></li>' for r, t in LEGALES)
     cuerpo_s = "".join(f'<section id="{i}" aria-labelledby="{i}-t"><h2 id="{i}-t"><span class="mono">{n:02d}</span>{e(t)}</h2>{h}</section>'
                        for n, (i, t, h) in enumerate(secciones, 1))
     cuerpo = f"""<div class="wrap"><div class="legal">
@@ -797,9 +796,6 @@ def legal(ruta, titulo, desc, intro, secciones):
     <h1>{e(titulo)}</h1>
     <p class="mono legal-fecha">Última actualización: {ACTUALIZACION}</p>
   </header>
-  <aside class="legal-lado">
-    <nav aria-label="Políticas de Ofrenda"><p class="mono">Políticas</p><ul>{otras}</ul></nav>
-  </aside>
   <article class="prose legal-texto">
     <p class="legal-intro">{intro}</p>
     {cuerpo_s}
