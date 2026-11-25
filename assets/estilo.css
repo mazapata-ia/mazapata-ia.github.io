@@ -748,3 +748,8 @@ html[data-lec-enfoque] .legal-lado { display: none; }
 html[data-lec-enfoque] .legal { grid-template-columns: minmax(0, 1fr); }
 .legal-texto a.correo { font: inherit; font-size: inherit; letter-spacing: inherit; word-break: break-word; border: 0; padding: 0; }
 @media (max-width: 620px) { .legal-lado nav + nav { display: none; } }
+
+/* Barra superior: accesos a Quién habita, Apoyar y Envía tu propuesta */
+.bar-center a { text-decoration: none; }
+.bar-center a:hover, .bar-center a[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+.bar-center .sep { white-space: pre; }

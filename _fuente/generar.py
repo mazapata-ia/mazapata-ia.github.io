@@ -182,6 +182,9 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
     verif = (f'<meta name="google-site-verification" content="{e(SITIO["google_verificacion"])}">'
              if SITIO.get("google_verificacion") else "")
     robots = "" if indexar else '<meta name="robots" content="noindex">'
+    barra_html = '<span class="sep" aria-hidden="true"> · </span>'.join(
+        f'<a href="{BASE}{r}"{" aria-current=\"page\"" if ruta.startswith(r) else ""}>{t}</a>'
+        for r, t in [("quien-habita/", "Quién habita"), ("apoyar/", "Apoyar"), ("enviar/", "Envía tu propuesta")])
     apoyo = SITIO.get("apoyo", {})
     banda_html = f"""
 <section class="support-band" aria-label="Apoyar este espacio">
@@ -229,7 +232,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
       <picture class="brand-logo"><source srcset="{BASE}assets/logo-mini.webp" type="image/webp"><img src="{BASE}assets/logo-mini.png" width="34" height="45" alt=""></picture>
       <span>{e(SITIO['nombre'])}</span>
     </a>
-    <a class="bar-center mono" href="{BASE}">Escritos · Lecturas</a>
+    <nav class="bar-center mono" aria-label="Accesos">{barra_html}</nav>
     <button class="menu-btn" id="menu-open" aria-expanded="false" aria-controls="menu" type="button">
       <i></i><i></i><span class="mono">Menú</span>
     </button>
