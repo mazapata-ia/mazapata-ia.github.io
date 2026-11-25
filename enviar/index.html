@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=DM+Mono:wght@400;500&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/estilo.css?v=202611242333">
+<link rel="stylesheet" href="/assets/estilo.css?v=202611242342">
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 </head>
@@ -127,10 +127,13 @@
       </fieldset>
 
       <fieldset class="prop-grupo">
-        <legend class="mono">III · Autoría</legend>
+        <legend class="mono">III · Autoría y datos</legend>
         <label class="prop-check"><input type="checkbox" name="Autoría" value="Confirmo que el texto es de mi autoría y que puedo compartirlo" required aria-describedby="prop-autoria-err">
           <span>Confirmo que el texto es de mi autoría y que tengo derecho a compartirlo.</span></label>
         <p class="prop-err" id="prop-autoria-err" hidden>Para enviar, confirma que el texto es tuyo.</p>
+        <label class="prop-check"><input type="checkbox" name="Autorización de datos" value="Acepto los términos y autorizo el tratamiento de mis datos" required aria-describedby="prop-datos-err">
+          <span>Acepto los <a href="/terminos/#propuestas">términos para enviar propuestas</a> y autorizo a Ofrenda a tratar mis datos personales para gestionar mi propuesta, según la <a href="/privacidad/">política de datos personales</a>.</span></label>
+        <p class="prop-err" id="prop-datos-err" hidden>Para enviar, acepta los términos y la autorización de datos.</p>
       </fieldset>
 
       <div class="prop-enviar">
@@ -147,6 +150,7 @@
       <dt>Qué recibe Ofrenda</dt><dd>Poesía, ensayo, crónica, literatura (cuento, relato o fragmento de un libro) y reflexiones sobre lecturas.</dd>
       <dt>Cómo</dt><dd>Pega el texto en el formulario o adjunta un archivo.</dd>
       <dt>Autoría</dt><dd>El texto debe ser tuyo. Si se publica, aparecerá con tu nombre y tal como lo escribiste.</dd>
+      <dt>Tus derechos</dt><dd>Conservas los derechos de autor de tu texto. Antes de publicarlo, Ofrenda te escribirá para confirmar.</dd>
       <dt>Varios textos</dt><dd>Envía cada propuesta por separado; si son poemas, puedes reunirlos en un solo archivo.</dd>
     </dl>
   </aside>
@@ -170,8 +174,14 @@
       <a href="/breves/">Breves</a><a href="/largos/">Largos</a><a href="/lecturas/">Lecturas</a><a href="/quien-habita/">Quién habita</a><a href="/apoyar/">Apoyar</a><a href="/enviar/">Envía tu propuesta</a>
     </nav>
   </div>
+  <div class="wrap pie-legal">
+    <p class="mono">© 2026 Ofrenda · Cada texto pertenece a quien lo firma. Todos los derechos reservados.</p>
+    <nav class="mono" aria-label="Políticas">
+      <a href="/terminos/">Términos y condiciones</a><a href="/derechos-de-autor/">Derechos de autor</a><a href="/privacidad/">Datos personales</a>
+    </nav>
+  </div>
 </footer>
-<script src="/assets/sitio.js?v=202611242333" defer></script>
-<script src="/assets/lectura.js?v=202611242333" defer></script>
+<script src="/assets/sitio.js?v=202611242342" defer></script>
+<script src="/assets/lectura.js?v=202611242342" defer></script>
 </body>
 </html>

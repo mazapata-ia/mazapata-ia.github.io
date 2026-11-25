@@ -19,6 +19,7 @@ SITIO = DATOS["sitio"]
 BASE = SITIO["base"]
 URL = SITIO["url"].rstrip("/")
 VERSION = datetime.datetime.now().strftime("%Y%m%d%H%M")
+ANIO = datetime.date.today().year
 
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre"]
@@ -35,7 +36,7 @@ GENEROS = {
     "lecturas": [{"id": "libros", "nombre": "Libros"}, {"id": "articulos", "nombre": "Artículos"}],
 }
 ORDEN = ["breves", "largos", "lecturas"]
-GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "enviar", "escritos"]
+GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "enviar", "terminos", "derechos-de-autor", "privacidad", "escritos"]
 
 e = lambda s: html.escape(str(s), quote=True)
 
@@ -262,6 +263,12 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
     <span class="mono">{e(SITIO['nombre'])} · {e(SITIO['autora'])} y voces invitadas</span>
     <nav class="mono" aria-label="Pie">
       <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a><a href="{BASE}enviar/">Envía tu propuesta</a>
+    </nav>
+  </div>
+  <div class="wrap pie-legal">
+    <p class="mono">© {ANIO} Ofrenda · Cada texto pertenece a quien lo firma. Todos los derechos reservados.</p>
+    <nav class="mono" aria-label="Políticas">
+      <a href="{BASE}terminos/">Términos y condiciones</a><a href="{BASE}derechos-de-autor/">Derechos de autor</a><a href="{BASE}privacidad/">Datos personales</a>
     </nav>
   </div>
 </footer>
@@ -726,10 +733,13 @@ def enviar():
       </fieldset>
 
       <fieldset class="prop-grupo">
-        <legend class="mono">III · Autoría</legend>
+        <legend class="mono">III · Autoría y datos</legend>
         <label class="prop-check"><input type="checkbox" name="Autoría" value="Confirmo que el texto es de mi autoría y que puedo compartirlo" required aria-describedby="prop-autoria-err">
           <span>Confirmo que el texto es de mi autoría y que tengo derecho a compartirlo.</span></label>
         <p class="prop-err" id="prop-autoria-err" hidden>Para enviar, confirma que el texto es tuyo.</p>
+        <label class="prop-check"><input type="checkbox" name="Autorización de datos" value="Acepto los términos y autorizo el tratamiento de mis datos" required aria-describedby="prop-datos-err">
+          <span>Acepto los <a href="{BASE}terminos/#propuestas">términos para enviar propuestas</a> y autorizo a Ofrenda a tratar mis datos personales para gestionar mi propuesta, según la <a href="{BASE}privacidad/">política de datos personales</a>.</span></label>
+        <p class="prop-err" id="prop-datos-err" hidden>Para enviar, acepta los términos y la autorización de datos.</p>
       </fieldset>
 
       <div class="prop-enviar">
@@ -746,11 +756,153 @@ def enviar():
       <dt>Qué recibe Ofrenda</dt><dd>Poesía, ensayo, crónica, literatura (cuento, relato o fragmento de un libro) y reflexiones sobre lecturas.</dd>
       <dt>Cómo</dt><dd>Pega el texto en el formulario o adjunta un archivo.</dd>
       <dt>Autoría</dt><dd>El texto debe ser tuyo. Si se publica, aparecerá con tu nombre y tal como lo escribiste.</dd>
+      <dt>Tus derechos</dt><dd>Conservas los derechos de autor de tu texto. Antes de publicarlo, Ofrenda te escribirá para confirmar.</dd>
       <dt>Varios textos</dt><dd>Envía cada propuesta por separado; si son poemas, puedes reunirlos en un solo archivo.</dd>
     </dl>
   </aside>
 </section></div>"""
     return pagina("enviar/", "Envía tu propuesta", "Envía tu texto a Ofrenda: poesía, ensayo, crónica, literatura y lecturas.", cuerpo)
+
+
+ACTUALIZACION = "24 de noviembre de 2026"
+LEGALES = [("terminos/", "Términos y condiciones"), ("derechos-de-autor/", "Derechos de autor"), ("privacidad/", "Datos personales")]
+NORMAS = {
+    "ley23": "https://cancilleria.gov.co/normograma/compilacion/docs/ley_0023_1982.htm",
+    "dec351": "https://cancilleria.gov.co/normograma/compilacion/docs/decision_comisioncandina_dec351.htm",
+    "ley1581": "https://cancilleria.gov.co/normograma/compilacion/docs/ley_1581_2012.htm",
+    "sic": "https://www.sic.gov.co/",
+}
+
+
+def correo_html():
+    u, d = "mazapatatrabajo", "gmail.com"
+    return f'<a class="correo" data-u="{u}" data-d="{d}" href="#">{u} [arroba] {d.replace(".", " [punto] ")}</a>'
+
+
+def norma(clave, texto):
+    return f'<a href="{NORMAS[clave]}" target="_blank" rel="noopener">{texto}</a>'
+
+
+def legal(ruta, titulo, desc, intro, secciones):
+    """secciones: lista de (id, título, html)."""
+    otras = "".join(f'<li><a href="{BASE}{r}"{" aria-current=\"page\"" if r == ruta else ""}>{e(t)}</a></li>' for r, t in LEGALES)
+    indice = "".join(f'<li><a href="#{i}">{e(t)}</a></li>' for i, t, _ in secciones)
+    cuerpo_s = "".join(f'<section id="{i}" aria-labelledby="{i}-t"><h2 id="{i}-t"><span class="mono">{n:02d}</span>{e(t)}</h2>{h}</section>'
+                       for n, (i, t, h) in enumerate(secciones, 1))
+    cuerpo = f"""<div class="wrap"><div class="legal">
+  <header class="legal-cab">
+    <p class="mono">Ofrenda · Políticas</p>
+    <h1>{e(titulo)}</h1>
+    <p class="mono legal-fecha">Última actualización: {ACTUALIZACION}</p>
+  </header>
+  <aside class="legal-lado">
+    <nav aria-label="Políticas de Ofrenda"><p class="mono">Políticas</p><ul>{otras}</ul></nav>
+    <nav aria-label="En esta página"><p class="mono">En esta página</p><ol>{indice}</ol></nav>
+  </aside>
+  <article class="prose legal-texto">
+    <p class="legal-intro">{intro}</p>
+    {cuerpo_s}
+  </article>
+</div></div>"""
+    return pagina(ruta, titulo, desc, cuerpo)
+
+
+def terminos():
+    C = correo_html()
+    sec = [
+        ("que-es", "Qué es Ofrenda", f"""<p>Ofrenda es un espacio de lectura y escritura que publica textos de Mariana Zapata y de voces invitadas: poesía, ensayo, crónica, literatura y reflexiones sobre lecturas. Leer los textos es gratuito.</p>"""),
+        ("uso", "Uso del sitio", f"""<p>Puedes leer los textos, compartir sus enlaces y citar fragmentos breves como se explica en la política de <a href="{BASE}derechos-de-autor/">derechos de autor</a>.</p>
+<p>No está permitido:</p>
+<ul><li>copiar o publicar en otro lugar textos completos o partes sustanciales sin autorización de su autor;</li>
+<li>usar los textos o imágenes con fines comerciales sin autorización;</li>
+<li>presentar como propio un texto publicado en Ofrenda o atribuirlo a otra persona;</li>
+<li>intentar afectar el funcionamiento o la seguridad del sitio.</li></ul>"""),
+        ("voces", "Textos de voces invitadas", """<p>Cada texto pertenece a quien lo firma. Las ideas y opiniones expresadas en cada texto son de su autor o autora. Ofrenda publica los textos tal como sus autores los entregan, sin corregirlos ni modificarlos.</p>"""),
+        ("propuestas", "Envío de propuestas", f"""<p>Cualquier persona puede enviar un texto desde <a href="{BASE}enviar/">Envía tu propuesta</a>. Al hacerlo:</p>
+<ul><li><strong>Declaras</strong> que el texto es de tu autoría, que tienes derecho a compartirlo y que no infringe derechos de otras personas.</li>
+<li><strong>Conservas todos tus derechos de autor.</strong> Enviar una propuesta no transfiere ningún derecho a Ofrenda.</li>
+<li>Enviar un texto no obliga a Ofrenda a publicarlo. La selección es una decisión editorial de Ofrenda.</li>
+<li>Si tu texto es seleccionado, Ofrenda te escribirá <strong>antes de publicarlo</strong> para pedir tu autorización. Con ella, Ofrenda podrá publicarlo en este sitio de forma gratuita y <strong>no exclusiva</strong>: puedes seguir publicándolo donde quieras.</li>
+<li>Tu texto se publicará con tu nombre o firma y tal como lo enviaste.</li>
+<li>Puedes pedir en cualquier momento que se retire un texto tuyo publicado en Ofrenda escribiendo a {C}.</li>
+<li>La publicación no genera pago, salvo que se acuerde algo distinto por escrito.</li></ul>
+<p>Los datos que envíes con tu propuesta se tratan según la <a href="{BASE}privacidad/">política de datos personales</a>.</p>"""),
+        ("aportes", "Aportes y compras", """<p>Los aportes que se hacen desde la página Apoyar (Ko-fi o Bre-B) son voluntarios: sirven para sostener el sitio y no dan acceso a contenidos exclusivos. Los pagos los procesan esas plataformas y entidades financieras, con sus propios términos. Ofrenda no recibe ni guarda datos de tarjetas o cuentas.</p>
+<p>Cuando un libro se ofrece para la venta, la compra se hace en la tienda externa que se indica (por ejemplo, Amazon) y se rige por los términos de esa tienda. Ofrenda no procesa pagos de libros.</p>"""),
+        ("enlaces", "Enlaces a otros sitios", """<p>Ofrenda puede enlazar a sitios de terceros (tiendas, plataformas de pago o normas oficiales). Ofrenda no controla esos sitios ni responde por su contenido o por sus políticas.</p>"""),
+        ("responsabilidad", "Disponibilidad y responsabilidad", """<p>Ofrenda procura que el sitio funcione bien y esté disponible, pero puede tener interrupciones o errores. El sitio se ofrece tal como está, sin garantías de disponibilidad permanente.</p>"""),
+        ("cambios", "Cambios a estos términos", """<p>Estos términos pueden actualizarse. La versión vigente es siempre la publicada en esta página, con su fecha de actualización.</p>"""),
+        ("ley", "Ley aplicable", """<p>Estos términos se rigen por las leyes de la República de Colombia.</p>"""),
+        ("contacto", "Contacto", f"""<p>Para cualquier pregunta sobre estos términos, escribe a {C}.</p>"""),
+    ]
+    intro = "Estos términos regulan el uso de Ofrenda (mazapata-ia.github.io), un espacio de escritura creado y administrado por Mariana Zapata. Al navegar el sitio, leer sus textos o enviar una propuesta, aceptas estos términos."
+    return legal("terminos/", "Términos y condiciones", "Términos y condiciones de uso de Ofrenda y del envío de propuestas.", intro, sec)
+
+
+def derechos():
+    C = correo_html()
+    sec = [
+        ("proteccion", "Las obras están protegidas", f"""<p>Los textos, dibujos, fotografías y demás obras publicadas en Ofrenda están protegidos por el derecho de autor, de acuerdo con la {norma("ley23", "Ley 23 de 1982")}, la {norma("dec351", "Decisión Andina 351 de 1993")} y las demás normas aplicables. Esta protección existe por la sola creación de la obra y no depende de ningún registro.</p>
+<p class="legal-aviso">© Mariana Zapata y los autores de cada obra. Todos los derechos reservados.</p>"""),
+        ("titulares", "A quién pertenece cada obra", """<p>Cada obra pertenece a su autor o autora. Los textos y dibujos de Mariana Zapata son de su autoría. Los textos de voces invitadas pertenecen a quienes los firman. Publicar una obra en Ofrenda no transfiere sus derechos a Ofrenda ni a ninguna otra persona.</p>"""),
+        ("morales", "Derechos morales", """<p>Cada autor conserva siempre el derecho a que se reconozca su autoría y a que su obra no sea deformada o modificada de forma que afecte su honor o su reputación. La ley colombiana reconoce estos derechos como perpetuos, inalienables e irrenunciables (artículo 30 de la Ley 23 de 1982).</p>"""),
+        ("patrimoniales", "Derechos patrimoniales", """<p>Solo el autor, o quien tenga sus derechos, puede autorizar o prohibir que su obra se reproduzca, se comunique al público (incluida su publicación en internet), se distribuya, se traduzca, se adapte o se transforme (artículo 12 de la Ley 23 de 1982).</p>"""),
+        ("permitido", "Lo que puedes hacer", """<ul><li>Leer los textos en el sitio.</li>
+<li>Compartir el enlace de cualquier página.</li>
+<li>Citar pasajes breves, siempre que menciones el nombre del autor y el título de la obra, y que la cita no sea tan extensa que reemplace la lectura del original (artículo 31 de la Ley 23 de 1982). Te agradecemos incluir el enlace a Ofrenda.</li></ul>"""),
+        ("autorizacion", "Lo que necesita autorización", f"""<p>Necesitas la autorización previa y por escrito del autor para:</p>
+<ul><li>reproducir una obra completa o una parte sustancial en otro sitio, red social, blog, revista, libro o antología, también en capturas de pantalla o imágenes;</li>
+<li>usar una obra con fines comerciales o publicitarios;</li>
+<li>traducirla, adaptarla, musicalizarla, grabarla en audio o video o leerla en público;</li>
+<li>usar las obras para entrenar, alimentar o ajustar sistemas de inteligencia artificial, o para minería de textos y datos.</li></ul>
+<p>Para pedir un permiso escribe a {C} indicando la obra, el uso que quieres darle y el medio donde aparecerá. Si la obra es de una voz invitada, Ofrenda te pondrá en contacto con su autor.</p>"""),
+        ("infracciones", "Si encuentras una copia no autorizada", f"""<p>Si ves una obra de Ofrenda publicada en otro lugar sin autorización, o si crees que algo publicado en Ofrenda infringe tus derechos, escribe a {C} con el enlace y una breve explicación. Lo revisaremos y, si corresponde, retiraremos el contenido.</p>"""),
+        ("normas", "Normas de referencia", f"""<ul><li>{norma("ley23", "Ley 23 de 1982, sobre derechos de autor")} (Normograma de la Cancillería).</li>
+<li>{norma("dec351", "Decisión 351 de 1993, Régimen Común sobre Derecho de Autor y Derechos Conexos")} (Normograma de la Cancillería).</li></ul>"""),
+    ]
+    intro = "Todo lo que se publica en Ofrenda tiene autor. Esta política explica a quién pertenecen las obras, qué puedes hacer con ellas y qué necesita permiso."
+    return legal("derechos-de-autor/", "Derechos de autor", "Política de derechos de autor de Ofrenda: las obras pertenecen a sus autores.", intro, sec)
+
+
+def privacidad():
+    C = correo_html()
+    sec = [
+        ("responsable", "Responsable", f"""<p>La responsable del tratamiento de los datos personales que se recogen en Ofrenda es <strong>Mariana Zapata</strong>, persona natural que crea y administra el sitio, en Colombia. Contacto: {C}.</p>
+<p>Esta política se rige por la {norma("ley1581", "Ley 1581 de 2012")} y sus decretos reglamentarios.</p>"""),
+        ("datos", "Qué datos se recogen", f"""<ul><li><strong>Formulario de propuestas:</strong> nombre o firma, correo electrónico, lugar desde donde escribes (opcional), unas líneas sobre ti (opcional) y el texto o archivo que envías.</li>
+<li><strong>Correos:</strong> si escribes directamente, tu dirección de correo y lo que cuentes en el mensaje.</li>
+<li><strong>Aportes:</strong> los procesan Ko-fi, PayPal o tu banco. Ofrenda no recibe ni guarda datos de tarjetas o cuentas; puede recibir de esas plataformas el nombre y el mensaje que decidas dejar.</li>
+<li><strong>Preferencias de lectura:</strong> los ajustes del panel de lectura (tamaño de letra, colores, etc.) se guardan solo en tu navegador y no se envían a Ofrenda.</li></ul>
+<p>Ofrenda no usa cookies propias ni herramientas de analítica o publicidad. Los proveedores técnicos del sitio (GitHub, que lo aloja; Google Fonts, que entrega tipografías; y Ko-fi, en la página Apoyar) pueden registrar datos técnicos como la dirección IP según sus propias políticas.</p>
+<p>Ofrenda no solicita datos sensibles. Te pedimos no incluirlos en tu propuesta ni en tus datos de contacto.</p>"""),
+        ("finalidades", "Para qué se usan", """<ul><li>Leer y evaluar tu propuesta.</li>
+<li>Responderte y mantener contacto sobre ella.</li>
+<li>Si tu texto se publica y lo autorizas: mostrar junto a él tu nombre o firma y, si lo enviaste, el lugar y las líneas sobre ti.</li>
+<li>Atender tus consultas, solicitudes y reclamos.</li></ul>
+<p>Tus datos no se venden, no se alquilan y no se usan para enviarte publicidad.</p>"""),
+        ("terceros", "Quién más interviene", """<p>Para funcionar, Ofrenda se apoya en servicios de terceros que pueden tratar tus datos por cuenta de Ofrenda:</p>
+<ul><li><strong>FormSubmit</strong>, que recibe el formulario de propuestas y lo reenvía por correo.</li>
+<li><strong>Google (Gmail)</strong>, donde se reciben y guardan los correos.</li>
+<li><strong>GitHub</strong>, que aloja el sitio.</li></ul>
+<p>Algunos de estos servicios guardan la información en servidores fuera de Colombia. Al enviar tu propuesta y dar tu autorización, aceptas que tus datos se traten en esos servidores para las finalidades descritas.</p>"""),
+        ("menores", "Menores de edad", """<p>Si tienes menos de 18 años, envía tu propuesta con el acompañamiento y la autorización de tu madre, padre o representante legal.</p>"""),
+        ("conservacion", "Cuánto tiempo se guardan", """<p>Los datos se guardan mientras sean necesarios para las finalidades descritas. Si tu texto está publicado, los datos que lo acompañan se conservan mientras siga publicado. Puedes pedir en cualquier momento que se borren tus datos y tu propuesta.</p>"""),
+        ("derechos", "Tus derechos", """<p>Como titular de tus datos tienes derecho a (artículo 8 de la Ley 1581 de 2012):</p>
+<ul><li>conocer, actualizar y rectificar tus datos;</li>
+<li>pedir prueba de la autorización que diste;</li>
+<li>ser informado, si lo pides, sobre el uso que se ha dado a tus datos;</li>
+<li>presentar quejas ante la Superintendencia de Industria y Comercio;</li>
+<li>revocar la autorización o pedir que se borren tus datos, en los términos que establece la ley;</li>
+<li>acceder gratis a tus datos.</li></ul>"""),
+        ("ejercer", "Cómo ejercerlos", f"""<p>Escribe a {C} con el asunto «Datos personales», tu nombre, el correo con el que enviaste tu propuesta y lo que solicitas.</p>
+<ul><li><strong>Consultas:</strong> se responden en máximo 10 días hábiles. Si no es posible, te avisaremos el motivo y la nueva fecha, que no superará 5 días hábiles más (artículo 14 de la Ley 1581).</li>
+<li><strong>Reclamos</strong> (corrección, actualización, supresión o incumplimiento): se atienden en máximo 15 días hábiles, prorrogables hasta por 8 días hábiles más avisándote el motivo (artículo 15 de la Ley 1581).</li></ul>
+<p>Si después de este trámite no estás conforme, puedes acudir a la {norma("sic", "Superintendencia de Industria y Comercio")}.</p>"""),
+        ("seguridad", "Seguridad", """<p>Ofrenda toma medidas razonables para proteger tus datos: por ejemplo, su correo no aparece escrito en el código del sitio y los datos del formulario viajan cifrados. Ningún sistema en internet es completamente seguro, así que te pedimos no enviar información que no sea necesaria.</p>"""),
+        ("vigencia", "Vigencia y cambios", f"""<p>Esta política rige desde el {ACTUALIZACION}. Si cambia, la nueva versión se publicará en esta página con su fecha de actualización.</p>"""),
+    ]
+    intro = "Esta política explica qué datos personales recoge Ofrenda, para qué los usa y cómo puedes conocerlos, corregirlos o pedir que se borren."
+    return legal("privacidad/", "Política de tratamiento de datos personales", "Cómo trata Ofrenda los datos personales, según la Ley 1581 de 2012.", intro, sec)
 
 
 def gracias():
@@ -849,6 +1001,9 @@ for L in LIBROS:
 escribir("quien-habita/index.html", quien_habita())
 escribir("enviar/index.html", enviar())
 escribir("enviar/gracias/index.html", gracias())
+escribir("terminos/index.html", terminos())
+escribir("derechos-de-autor/index.html", derechos())
+escribir("privacidad/index.html", privacidad())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
 escribir("404.html", no_encontrado())
@@ -859,7 +1014,7 @@ for k in ORDEN:
     urls += [(f"{k}/", hoy)] + [(f"{k}/{G['id']}/", hoy) for G in GENEROS[k]]
 urls += [(f"breves/poesia/{C['id']}/", C["fecha"]) for C in CUADERNOS if not C.get("muestra")]
 urls += [(url_libro(L)[len(BASE):], L["fecha"]) for L in LIBROS if not L.get("muestra")]
-urls += [("quien-habita/", None), ("apoyar/", None), ("enviar/", None)]
+urls += [("quien-habita/", None), ("apoyar/", None), ("enviar/", None), ("terminos/", None), ("derechos-de-autor/", None), ("privacidad/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'

@@ -233,6 +233,8 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
     if (marcar(texto, "prop-contenido-err", vacio) && !primero) primero = texto;
     var autoria = f.querySelector('input[name="Autoría"]');
     chequea(null, "prop-autoria-err", !autoria.checked); if (!autoria.checked && !primero) primero = autoria;
+    var datos = f.querySelector('input[name="Autorización de datos"]');
+    chequea(null, "prop-datos-err", !datos.checked); if (!datos.checked && !primero) primero = datos;
     return primero;
   }
   f.addEventListener("change", function (ev) {
