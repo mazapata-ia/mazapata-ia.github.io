@@ -35,7 +35,7 @@ GENEROS = {
     "lecturas": [{"id": "libros", "nombre": "Libros"}, {"id": "articulos", "nombre": "Artículos"}],
 }
 ORDEN = ["breves", "largos", "lecturas"]
-GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "escritos"]
+GENERADAS = ["breves", "largos", "lecturas", "acerca", "quien-habita", "apoyar", "enviar", "escritos"]
 
 e = lambda s: html.escape(str(s), quote=True)
 
@@ -248,6 +248,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
       <li><a href="{BASE}lecturas/"><span class="mono">III</span><span>Lecturas que me atraviesan</span></a></li>
       <li><a href="{BASE}quien-habita/"><span class="mono">IV</span><span>Quién habita</span></a></li>
       <li><a href="{BASE}apoyar/"><span class="mono">V</span><span>Apoyar</span></a></li>
+      <li><a href="{BASE}enviar/"><span class="mono">VI</span><span>Envía tu propuesta</span></a></li>
     </ol>
   </div>
 </nav>
@@ -260,7 +261,7 @@ def pagina(ruta, titulo, desc, cuerpo, indexar=True, tipo="website", extra_head=
   <div class="wrap">
     <span class="mono">{e(SITIO['nombre'])} · {e(SITIO['autora'])} y voces invitadas</span>
     <nav class="mono" aria-label="Pie">
-      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a>
+      <a href="{BASE}breves/">Breves</a><a href="{BASE}largos/">Largos</a><a href="{BASE}lecturas/">Lecturas</a><a href="{BASE}quien-habita/">Quién habita</a><a href="{BASE}apoyar/">Apoyar</a><a href="{BASE}enviar/">Envía tu propuesta</a>
     </nav>
   </div>
 </footer>
@@ -646,6 +647,124 @@ def quien_habita():
     return pagina("quien-habita/", "Quién habita", f"{SITIO['autora']}, quien escribe Ofrenda.", cuerpo)
 
 
+# Propuestas: el formulario envía a FormSubmit, que reenvía cada propuesta al correo de Mariana.
+# Cuando FormSubmit entregue la clave aleatoria (tras confirmar el correo), ponerla en
+# escritos.json -> sitio.propuestas.clave para que el correo no aparezca en la dirección del formulario.
+def enviar():
+    P = SITIO.get("propuestas", {})
+    usuario, dominio = "mazapatatrabajo", "gmail.com"
+    opciones = ""
+    for k in ORDEN:
+        for G in GENEROS[k]:
+            opciones += f'<option value="{e(SECCIONES[k]["nombre"])} · {e(G["nombre"])}">{e(SECCIONES[k]["nombre"])} · {e(G["nombre"])}</option>'
+    opciones += '<option value="No estoy segura/o">No estoy segura/o</option>'
+    cuerpo = f"""<div class="wrap"><section class="page enviar">
+  <div>
+    <p class="mono">VI — Envía tu propuesta</p>
+    <h1>Envía tu propuesta</h1>
+    <p class="big">Ofrenda también es casa para otras voces. Si escribes, puedes enviar aquí tu texto para que sea leído y considerado para publicación.</p>
+
+    <form class="propuesta" id="propuesta" method="POST" enctype="multipart/form-data" novalidate
+          data-u="{usuario}" data-d="{dominio}" data-clave="{e(P.get('clave', ''))}" aria-describedby="prop-nota">
+      <input type="hidden" name="_subject" value="Nueva propuesta para Ofrenda">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="{URL}/enviar/gracias/">
+      <input type="hidden" name="_autoresponse" value="Gracias por enviar tu propuesta a Ofrenda. La recibimos y la leeremos con atención.">
+      <div class="prop-trampa" aria-hidden="true"><label>No llenes este campo<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></div>
+
+      <fieldset class="prop-grupo">
+        <legend class="mono">I · Quién escribe</legend>
+        <div class="prop-campo">
+          <label for="prop-nombre">Nombre con el que firmas <span class="prop-req" aria-hidden="true">*</span></label>
+          <input id="prop-nombre" name="Nombre" type="text" autocomplete="name" required maxlength="120" aria-describedby="prop-nombre-err">
+          <p class="prop-err" id="prop-nombre-err" hidden>Escribe tu nombre o el nombre con el que firmas.</p>
+        </div>
+        <div class="prop-campo">
+          <label for="prop-correo">Correo <span class="prop-req" aria-hidden="true">*</span></label>
+          <input id="prop-correo" name="email" type="email" autocomplete="email" required maxlength="160" aria-describedby="prop-correo-ayuda prop-correo-err">
+          <p class="prop-ayuda" id="prop-correo-ayuda">Solo para responderte sobre tu propuesta.</p>
+          <p class="prop-err" id="prop-correo-err" hidden>Escribe un correo válido, por ejemplo nombre@correo.com.</p>
+        </div>
+        <div class="prop-campo">
+          <label for="prop-lugar">Desde dónde escribes <span class="prop-opc">(opcional)</span></label>
+          <input id="prop-lugar" name="Lugar" type="text" autocomplete="address-level2" maxlength="120">
+        </div>
+        <div class="prop-campo">
+          <label for="prop-bio">Unas líneas sobre ti <span class="prop-opc">(opcional)</span></label>
+          <textarea id="prop-bio" name="Sobre quien escribe" rows="3" maxlength="800" aria-describedby="prop-bio-ayuda"></textarea>
+          <p class="prop-ayuda" id="prop-bio-ayuda">Si tu texto se publica, pueden acompañarlo.</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="prop-grupo">
+        <legend class="mono">II · El texto</legend>
+        <div class="prop-campo">
+          <label for="prop-titulo">Título <span class="prop-req" aria-hidden="true">*</span></label>
+          <input id="prop-titulo" name="Título" type="text" required maxlength="200" aria-describedby="prop-titulo-err">
+          <p class="prop-err" id="prop-titulo-err" hidden>Escribe el título del texto (o «Sin título»).</p>
+        </div>
+        <div class="prop-campo">
+          <label for="prop-genero">Sección y género <span class="prop-req" aria-hidden="true">*</span></label>
+          <select id="prop-genero" name="Sección y género" required aria-describedby="prop-genero-err">
+            <option value="">Elige una opción</option>{opciones}
+          </select>
+          <p class="prop-err" id="prop-genero-err" hidden>Elige dónde crees que encaja tu texto.</p>
+        </div>
+        <div class="prop-campo">
+          <label for="prop-texto">Tu texto</label>
+          <textarea id="prop-texto" name="Texto" rows="12" maxlength="60000" aria-describedby="prop-texto-ayuda prop-contenido-err"></textarea>
+          <p class="prop-ayuda" id="prop-texto-ayuda">Pégalo tal como lo escribiste, o adjúntalo abajo.</p>
+        </div>
+        <div class="prop-campo">
+          <label for="prop-archivo">Adjuntar archivo</label>
+          <input id="prop-archivo" name="attachment" type="file" accept=".doc,.docx,.pdf,.odt,.rtf,.txt" aria-describedby="prop-archivo-ayuda prop-archivo-err prop-contenido-err">
+          <p class="prop-ayuda" id="prop-archivo-ayuda">Word, PDF, ODT, RTF o TXT, de máximo 10 MB.</p>
+          <p class="prop-err" id="prop-archivo-err" hidden>El archivo pesa más de 10 MB o no tiene un formato aceptado.</p>
+        </div>
+        <p class="prop-err" id="prop-contenido-err" hidden>Pega tu texto o adjunta un archivo.</p>
+      </fieldset>
+
+      <fieldset class="prop-grupo">
+        <legend class="mono">III · Autoría</legend>
+        <label class="prop-check"><input type="checkbox" name="Autoría" value="Confirmo que el texto es de mi autoría y que puedo compartirlo" required aria-describedby="prop-autoria-err">
+          <span>Confirmo que el texto es de mi autoría y que tengo derecho a compartirlo.</span></label>
+        <p class="prop-err" id="prop-autoria-err" hidden>Para enviar, confirma que el texto es tuyo.</p>
+      </fieldset>
+
+      <div class="prop-enviar">
+        <button type="submit" class="prop-boton mono">Enviar propuesta</button>
+        <p class="prop-estado" id="prop-estado" role="status" aria-live="polite"></p>
+      </div>
+      <p class="prop-nota" id="prop-nota">Los campos con <span aria-hidden="true">*</span><span class="lec-sr">asterisco</span> son obligatorios. Tus datos solo se usan para responderte.</p>
+    </form>
+    <noscript><p class="prop-nota">Para enviar tu propuesta necesitas activar JavaScript, o escríbeme a {usuario} [arroba] {dominio.replace(".", " [punto] ")}.</p></noscript>
+  </div>
+  <aside class="prop-guia" aria-labelledby="prop-guia-t">
+    <h2 id="prop-guia-t" class="mono">Antes de enviar</h2>
+    <dl>
+      <dt>Qué recibe Ofrenda</dt><dd>Poesía, ensayo, crónica, literatura (cuento, relato o fragmento de un libro) y reflexiones sobre lecturas.</dd>
+      <dt>Cómo</dt><dd>Pega el texto en el formulario o adjunta un archivo.</dd>
+      <dt>Autoría</dt><dd>El texto debe ser tuyo. Si se publica, aparecerá con tu nombre y tal como lo escribiste.</dd>
+      <dt>Varios textos</dt><dd>Envía cada propuesta por separado; si son poemas, puedes reunirlos en un solo archivo.</dd>
+    </dl>
+  </aside>
+</section></div>"""
+    return pagina("enviar/", "Envía tu propuesta", "Envía tu texto a Ofrenda: poesía, ensayo, crónica, literatura y lecturas.", cuerpo)
+
+
+def gracias():
+    cuerpo = f"""<div class="wrap"><section class="page enviar-gracias">
+  <div>
+    <p class="mono">VI — Envía tu propuesta</p>
+    <h1>Gracias</h1>
+    <p class="big">Tu propuesta llegó. La leeremos con atención y te escribiremos al correo que dejaste.</p>
+    <p><a class="btn-leer mono" href="{BASE}">Volver a la portada</a></p>
+  </div>
+</section></div>"""
+    return pagina("enviar/gracias/", "Gracias por tu propuesta", "Tu propuesta llegó a Ofrenda.", cuerpo, indexar=False)
+
+
 def redireccion(destino, texto="Ir a Quién habita"):
     u = f"{BASE}{destino}"
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ofrenda</title>
@@ -728,6 +847,8 @@ for C in CUADERNOS:
 for L in LIBROS:
     escribir(url_libro(L)[len(BASE):] + "index.html", libro(L))
 escribir("quien-habita/index.html", quien_habita())
+escribir("enviar/index.html", enviar())
+escribir("enviar/gracias/index.html", gracias())
 escribir("acerca/index.html", redireccion("quien-habita/"))
 escribir("apoyar/index.html", apoyar())
 escribir("404.html", no_encontrado())
@@ -738,7 +859,7 @@ for k in ORDEN:
     urls += [(f"{k}/", hoy)] + [(f"{k}/{G['id']}/", hoy) for G in GENEROS[k]]
 urls += [(f"breves/poesia/{C['id']}/", C["fecha"]) for C in CUADERNOS if not C.get("muestra")]
 urls += [(url_libro(L)[len(BASE):], L["fecha"]) for L in LIBROS if not L.get("muestra")]
-urls += [("quien-habita/", None), ("apoyar/", None)]
+urls += [("quien-habita/", None), ("apoyar/", None), ("enviar/", None)]
 urls += [(f"escritos/{x['id']}/", x["fecha"]) for x in ESCRITOS if not x.get("muestra")]
 sm = "".join(f"<url><loc>{e(URL + '/' + u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
 escribir("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'

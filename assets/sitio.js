@@ -205,3 +205,57 @@ document.querySelectorAll("a.correo[data-u]").forEach(function (a) {
     x0 = null;
   }, { passive: true });
 })();
+
+/* Formulario de propuestas: validación accesible y envío a FormSubmit */
+(function () {
+  var f = document.getElementById("propuesta");
+  if (!f) return;
+  var MAX = 10 * 1024 * 1024, TIPOS = /\.(docx?|pdf|odt|rtf|txt)$/i;
+  var estado = document.getElementById("prop-estado"), boton = f.querySelector(".prop-boton");
+  function marcar(campo, errId, mal) {
+    var err = document.getElementById(errId);
+    if (err) err.hidden = !mal;
+    if (campo) { if (mal) campo.setAttribute("aria-invalid", "true"); else campo.removeAttribute("aria-invalid"); }
+    return mal;
+  }
+  function revisar() {
+    var primero = null;
+    function chequea(id, errId, mal) { var c = document.getElementById(id); if (marcar(c, errId, mal) && !primero) primero = c; }
+    var correo = document.getElementById("prop-correo");
+    chequea("prop-nombre", "prop-nombre-err", !document.getElementById("prop-nombre").value.trim());
+    chequea("prop-correo", "prop-correo-err", !correo.value.trim() || !correo.checkValidity());
+    chequea("prop-titulo", "prop-titulo-err", !document.getElementById("prop-titulo").value.trim());
+    chequea("prop-genero", "prop-genero-err", !document.getElementById("prop-genero").value);
+    var archivo = document.getElementById("prop-archivo"), a = archivo.files && archivo.files[0];
+    chequea("prop-archivo", "prop-archivo-err", !!a && (a.size > MAX || !TIPOS.test(a.name)));
+    var texto = document.getElementById("prop-texto");
+    var vacio = !texto.value.trim() && !a;
+    if (marcar(texto, "prop-contenido-err", vacio) && !primero) primero = texto;
+    var autoria = f.querySelector('input[name="Autoría"]');
+    chequea(null, "prop-autoria-err", !autoria.checked); if (!autoria.checked && !primero) primero = autoria;
+    return primero;
+  }
+  f.addEventListener("change", function (ev) {
+    if (f.dataset.intentado) revisar();
+    if (ev.target.id === "prop-archivo") {
+      var a = ev.target.files && ev.target.files[0];
+      marcar(ev.target, "prop-archivo-err", !!a && (a.size > MAX || !TIPOS.test(a.name)));
+    }
+  });
+  f.addEventListener("submit", function (ev) {
+    f.dataset.intentado = "1";
+    var primero = revisar();
+    if (primero) {
+      ev.preventDefault();
+      estado.textContent = "Revisa los campos marcados antes de enviar.";
+      primero.focus();
+      return;
+    }
+    var titulo = document.getElementById("prop-titulo").value.trim();
+    f.querySelector('[name="_subject"]').value = "Nueva propuesta para Ofrenda: " + titulo;
+    f.action = "https://formsubmit.co/" + (f.dataset.clave || (f.dataset.u + "@" + f.dataset.d));
+    boton.disabled = true; boton.textContent = "Enviando…";
+    estado.textContent = "Enviando tu propuesta…";
+  });
+  window.addEventListener("pageshow", function () { boton.disabled = false; boton.textContent = "Enviar propuesta"; });
+})();
