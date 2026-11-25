@@ -740,14 +740,11 @@ html[data-lec-palabras] :is(.propuesta textarea, .prop-guia dd, .prop-ayuda) { w
 .prop-check a { color: inherit; text-underline-offset: 3px; }
 @media (max-width: 900px) {
   .legal { grid-template-columns: 1fr; }
-  .legal-lado { position: static; margin-bottom: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .legal-lado nav + nav { margin-top: 0; }
+  .legal-lado { position: static; margin-bottom: 26px; }
 }
-@media (max-width: 620px) { .legal-lado { grid-template-columns: 1fr; } }
 html[data-lec-enfoque] .legal-lado { display: none; }
 html[data-lec-enfoque] .legal { grid-template-columns: minmax(0, 1fr); }
 .legal-texto a.correo { font: inherit; font-size: inherit; letter-spacing: inherit; word-break: break-word; border: 0; padding: 0; }
-@media (max-width: 620px) { .legal-lado nav + nav { display: none; } }
 
 /* Barra superior: accesos a Quién habita, Apoyar y Envía tu propuesta */
 .bar-center a { text-decoration: none; }
