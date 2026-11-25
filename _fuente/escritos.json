@@ -10,17 +10,17 @@
       "texto": "Aquí trabajamos con la sensación de que cada pensamiento genera emociones a las que no les hallamos nombre, y que solo podemos describir como introspección. Si algo de lo que encuentras aquí te acompaña, puedes apoyar su continuidad con un aporte libre.",
       "opciones": [
         {
-          "tipo": "kofi",
-          "plataforma": "Desde cualquier país",
-          "detalle": "Con tarjeta o PayPal, sin salir de esta página.",
-          "usuario": "ofrenda"
-        },
-        {
           "tipo": "breb",
           "plataforma": "Desde Colombia · Bre-B",
           "detalle": "Escanea el código con la app de tu banco o de Nequi, o copia la llave. Sin comisiones: tu aporte llega completo.",
           "llave": "@mariana2204",
           "qr": "assets/breb-qr.png"
+        },
+        {
+          "tipo": "kofi",
+          "plataforma": "Desde cualquier país",
+          "detalle": "Con tarjeta o PayPal, sin salir de esta página.",
+          "usuario": "ofrenda"
         }
       ]
     }
